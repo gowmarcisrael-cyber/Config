@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}HAVEN — Immobilier{% endblock %}
+
+{% block content %}
+<!-- Hero + Filtres -->
+<div class="bg-slate-900 py-16 px-6 text-center">
+    <p class="text-orange-400 text-xs font-semibold tracking-widest uppercase mb-2">Trouvez votre bien idéal</p>
+    <h1 class="text-white text-3xl font-bold mb-8">Appartements · Maisons · Terrains</h1>
+
+    <form method="get" action="{% url 'search' %}"
+          class="bg-white rounded-xl p-4 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <div>
+            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Type</label>
+            <select name="property_type" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <option value="">Tous</option>
+                {% for value, label in types %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Statut</label>
+            <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <option value="">Tous</option>
+                {% for value, label in statuses %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Ville</label>
+            <input type="text" name="city" placeholder="Ex: Ouagadougou"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Prix max</label>
+            <input type="number" name="price_max" placeholder="Budget FCFA"
+                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg text-sm">
+            🔍 Rechercher
+        </button>
+    </form>
+</div>
+
+<!-- Annonces -->
+<div class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-slate-800">Annonces récentes
+            <span class="text-gray-400 font-normal text-sm">· {{ listings|length }} résultats</span>
+        </h2>
+        <a href="{% url 'search' %}" class="text-sm text-orange-500 font-medium hover:underline">Voir tout →</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for listing in listings %}
+        <div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+            <div class="relative h-44 bg-gray-100">
+                {% if listing.get_first_image %}
+                    <img src="{{ listing.get_first_image }}" alt="{{ listing.title }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-4xl">🏠</div>
+                {% endif %}
+                <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
+                    {% if listing.status == 'A louer' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ listing.status }}
+                </span>
+                <span class="absolute top-2 right-2 bg-white text-xs font-semibold px-2 py-1 rounded-md text-gray-700">
+                    {{ listing.property_type }}
+                </span>
+            </div>
+            <div class="p-4">
+                <h3 class="font-semibold text-slate-800 text-sm mb-1 truncate">{{ listing.title }}</h3>
+                <p class="text-xs text-gray-400 mb-3">📍 {{ listing.city }}</p>
+                <p class="text-orange-500 font-bold text-base mb-3">{{ listing.price|floatformat:0 }} FCFA</p>
+                <div class="flex gap-3 text-xs text-gray-500 border-t border-gray-50 pt-3">
+                    {% if listing.bedrooms %}<span>🛏 {{ listing.bedrooms }} ch.</span>{% endif %}
+                    {% if listing.bathrooms %}<span>🚿 {{ listing.bathrooms }} sdb</span>{% endif %}
+                    {% if listing.area %}<span>📐 {{ listing.area }} m²</span>{% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-16 text-gray-400">Aucune annonce disponible.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
