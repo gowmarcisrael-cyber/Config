@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Mes demandes envoyées — HAVEN{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-slate-800">Demandes envoyées</h1>
+        <a href="{% url 'dashboard' %}" class="text-sm text-orange-500 hover:underline">← Tableau de bord</a>
+    </div>
+
+    <div class="space-y-4">
+        {% for visit in visits %}
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 flex gap-4 items-center">
+            <div class="w-16 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                {% if visit.listing.get_first_image %}
+                    <img src="{{ visit.listing.get_first_image }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-xl">🏠</div>
+                {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-slate-800 text-sm truncate">{{ visit.listing.title }}</h3>
+                <p class="text-xs text-gray-400 mt-0.5">📅 {{ visit.date|date:"d/m/Y à H:i" }}</p>
+                {% if visit.message %}
+                <p class="text-xs text-gray-500 mt-1 truncate">{{ visit.message }}</p>
+                {% endif %}
+            </div>
+            <div class="flex-shrink-0">
+                {% include 'visits/partials/visits_status.html' %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-16 text-gray-400">
+            <p class="text-4xl mb-3">📅</p>
+            <p class="text-sm">Aucune demande envoyée.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

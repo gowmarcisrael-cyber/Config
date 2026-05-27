@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Mon profil — HAVEN{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Mon profil</h1>
+            <p class="text-sm text-gray-400 mt-1">Gérez vos informations personnelles</p>
+        </div>
+        <a href="{% url 'dashboard' %}" class="text-sm text-orange-500 hover:underline">← Tableau de bord</a>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="bg-green-50 text-green-700 text-sm rounded-xl px-4 py-3 mb-6">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Avatar -->
+    <div class="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
+        <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Photo de profil</h2>
+        <div class="flex items-center gap-6">
+            <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-3xl">👤</div>
+                {% endif %}
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="avatar">
+                <label class="cursor-pointer">
+                    <span class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                        Changer la photo
+                    </span>
+                    <input type="file" name="avatar" accept="image/*" class="hidden"
+                           onchange="this.form.submit()">
+                </label>
+            </form>
+        </div>
+    </div>
+
+    <!-- Infos -->
+    <div class="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
+        <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Informations générales</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="profile">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Prénom</label>
+                    <input type="text" name="first_name" value="{{ profile_form.first_name.value|default:'' }}"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Nom</label>
+                    <input type="text" name="last_name" value="{{ profile_form.last_name.value|default:'' }}"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Nom d'utilisateur</label>
+                <input type="text" name="username" value="{{ profile_form.username.value|default:'' }}"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if profile_form.username.errors %}<p class="text-xs text-red-500 mt-1">{{ profile_form.username.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                <input type="email" name="email" value="{{ profile_form.email.value|default:'' }}"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if profile_form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ profile_form.email.errors.0 }}</p>{% endif %}
+            </div>
+
+            <button type="submit"
+                    class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition-colors">
+                Enregistrer
+            </button>
+        </form>
+    </div>
+
+    <!-- Mot de passe -->
+    <div class="bg-white border border-gray-100 rounded-2xl p-6">
+        <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Changer le mot de passe</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="password">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Mot de passe actuel</label>
+                <input type="password" name="old_password"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if password_form.old_password.errors %}<p class="text-xs text-red-500 mt-1">{{ password_form.old_password.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Nouveau mot de passe</label>
+                <input type="password" name="new_password1"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if password_form.new_password1.errors %}<p class="text-xs text-red-500 mt-1">{{ password_form.new_password1.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Confirmer le mot de passe</label>
+                <input type="password" name="new_password2"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if password_form.new_password2.errors %}<p class="text-xs text-red-500 mt-1">{{ password_form.new_password2.errors.0 }}</p>{% endif %}
+            </div>
+
+            <button type="submit"
+                    class="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition-colors">
+                Changer le mot de passe
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -79,6 +79,9 @@
                     {% if listing.area %}<span>📐 {{ listing.area }} m²</span>{% endif %}
                 </div>
             </div>
+            <div>
+                {% include "listings/partials/favorite_btn.html" %}
+            </div>
         </div>
         {% empty %}
         <div class="col-span-3 text-center py-16 text-gray-400">Aucune annonce disponible.</div>

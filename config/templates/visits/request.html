@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Demander une visite — HAVEN{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-6 py-10">
+
+    <div class="mb-8">
+        <a href="{% url 'listing-detail' listing.id %}" class="text-sm text-orange-500 hover:underline">← Retour à l'annonce</a>
+        <h1 class="text-2xl font-bold text-slate-800 mt-3">Demander une visite</h1>
+        <p class="text-sm text-gray-400 mt-1">{{ listing.title }} — {{ listing.city }}</p>
+    </div>
+
+    <div class="bg-white border border-gray-100 rounded-2xl p-6">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Date et heure souhaitées</label>
+                <input type="datetime-local" name="date"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if form.date.errors %}<p class="text-xs text-red-500 mt-1">{{ form.date.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Message (optionnel)</label>
+                <textarea name="message" rows="3" placeholder="Précisez vos disponibilités ou questions..."
+                          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"></textarea>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                Envoyer la demande
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

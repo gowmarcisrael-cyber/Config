@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.accounts',
     'apps.listings',
+    'apps.visits',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,10 @@ MEDIA_URL = '/media/'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.SUCCESS: 'success',
+    messages.ERROR: 'error',
+}

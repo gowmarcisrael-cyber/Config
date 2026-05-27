@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}À propos — HAVEN{% endblock %}
+
+{% block extra_head %}
+<style>
+  .parallax {
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+  }
+  @media (max-width: 768px) {
+    .parallax { background-attachment: scroll; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero parallax -->
+<div class="parallax min-h-screen flex items-center justify-center relative"
+     style="background-image: linear-gradient(rgba(15,23,42,0.75), rgba(15,23,42,0.75)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600');">
+    <div class="text-center px-6 relative z-10">
+        <p class="text-orange-400 text-xs font-semibold tracking-widest uppercase mb-4">À propos de nous</p>
+        <h1 class="text-white text-5xl font-bold mb-6 leading-tight">
+            L'immobilier <br>
+            <span class="text-orange-400">simplifié</span>
+        </h1>
+        <p class="text-gray-300 text-lg max-w-xl mx-auto">
+            HAVEN connecte acheteurs, locataires et propriétaires au Burkina Faso depuis 2024.
+        </p>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <span class="text-white text-2xl">↓</span>
+    </div>
+</div>
+
+<!-- Mission -->
+<div class="bg-white py-24 px-6">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        <div>
+            <p class="text-orange-500 text-xs font-semibold tracking-widest uppercase mb-3">Notre mission</p>
+            <h2 class="text-3xl font-bold text-slate-800 mb-6 leading-tight">Rendre l'immobilier accessible à tous</h2>
+            <p class="text-gray-500 leading-relaxed mb-4">
+                Trouver un bien immobilier au Burkina Faso est souvent complexe, opaque et chronophage.
+                HAVEN a été créé pour changer ça.
+            </p>
+            <p class="text-gray-500 leading-relaxed">
+                Notre plateforme centralise les annonces, simplifie les contacts et offre des outils
+                modernes pour les propriétaires comme pour les chercheurs de biens.
+            </p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-orange-50 rounded-2xl p-6 text-center">
+                <p class="text-3xl font-bold text-orange-500 mb-1">500+</p>
+                <p class="text-sm text-gray-500">Annonces publiées</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-6 text-center">
+                <p class="text-3xl font-bold text-slate-700 mb-1">1200+</p>
+                <p class="text-sm text-gray-500">Utilisateurs</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-6 text-center">
+                <p class="text-3xl font-bold text-slate-700 mb-1">10+</p>
+                <p class="text-sm text-gray-500">Villes couvertes</p>
+            </div>
+            <div class="bg-orange-50 rounded-2xl p-6 text-center">
+                <p class="text-3xl font-bold text-orange-500 mb-1">98%</p>
+                <p class="text-sm text-gray-500">Clients satisfaits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Parallax 2 -->
+<div class="parallax py-32 px-6"
+     style="background-image: linear-gradient(rgba(15,23,42,0.8), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600');">
+    <div class="max-w-3xl mx-auto text-center">
+        <p class="text-orange-400 text-xs font-semibold tracking-widest uppercase mb-4">Notre vision</p>
+        <h2 class="text-white text-4xl font-bold leading-tight">
+            "Que chaque famille au Burkina Faso puisse trouver son chez-soi en toute confiance."
+        </h2>
+    </div>
+</div>
+
+<!-- Valeurs -->
+<div class="bg-gray-50 py-24 px-6">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16">
+            <p class="text-orange-500 text-xs font-semibold tracking-widest uppercase mb-3">Ce qui nous guide</p>
+            <h2 class="text-3xl font-bold text-slate-800">Nos valeurs</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
+                <div class="text-4xl mb-4">🤝</div>
+                <h3 class="font-bold text-slate-800 mb-3">Confiance</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Chaque annonce est vérifiée. Chaque utilisateur est protégé.
+                </p>
+            </div>
+            <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
+                <div class="text-4xl mb-4">⚡</div>
+                <h3 class="font-bold text-slate-800 mb-3">Simplicité</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Des outils clairs et intuitifs pour tous, sans jargon technique.
+                </p>
+            </div>
+            <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
+                <div class="text-4xl mb-4">🌍</div>
+                <h3 class="font-bold text-slate-800 mb-3">Impact local</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Conçu pour le Burkina Faso, par des gens qui le connaissent.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA parallax -->
+<div class="parallax py-32 px-6"
+     style="background-image: linear-gradient(rgba(249,115,22,0.9), rgba(234,88,12,0.9)), url('https://images.unsplash.com/photo-1582407947304-fd86f28f6c9e?w=1600');">
+    <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-white text-4xl font-bold mb-6">Prêt à trouver votre bien idéal ?</h2>
+        <div class="flex gap-4 justify-center">
+            <a href="{% url 'search' %}"
+               class="bg-white text-orange-500 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors">
+                Voir les annonces
+            </a>
+            <a href="{% url 'register' %}"
+               class="border-2 border-white text-white font-semibold px-8 py-3 rounded-xl hover:bg-white hover:text-orange-500 transition-colors">
+                Créer un compte
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

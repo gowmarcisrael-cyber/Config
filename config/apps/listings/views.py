@@ -1,15 +1,20 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from .models import Listing
+from .models import Listing,Favorite
+from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .forms import ListingForm
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST, require_http_methods
+from apps.visits.models import Visit
+
 # Create your views here.
+
 def home(request):
     listings = Listing.objects.all()[:6]
     context = {
         'listings':listings,
         'types':Listing.TYPES,
-        'statuses':Listing.STATUS[:2]
+        'statuses':Listing.STATUS[:2],
         }
     return render(request,'listings/index.html',context=context)
 
@@ -70,3 +75,93 @@ def create_listing(request):
     else:
         form = ListingForm()
     return render(request, 'listings/create.html', {'form': form})
+
+# listings/views.py
+def get_dashboard_context(user):
+    return {
+        'listings_count': Listing.objects.filter(user=user).count(),
+        'favorites_count': Favorite.objects.filter(user=user).count(),
+        'visits_received_count': Visit.objects.filter(receiver=user).count(),
+        'visits_sent_count': Visit.objects.filter(sender=user).count(),
+        'visits_pending_count': Visit.objects.filter(receiver=user, status='En attente').count(),
+    }
+
+@login_required
+def dashboard(request):
+    listings = Listing.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        **get_dashboard_context(request.user),
+        'listings': listings,
+        'active_tab': 'listings',
+    }
+    return render(request, 'dashboard/index.html', context)
+
+@login_required
+@require_POST
+def listing_delete(request,pk):
+    listing = get_object_or_404(Listing,pk=pk)
+    listing.delete()
+    return HttpResponse('')
+
+@login_required
+@require_POST
+def listing_change_status(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, user=request.user)
+    new_status = request.POST.get('status')
+    if new_status in dict(Listing.STATUS):
+        listing.status = new_status
+        listing.save()
+    return render(request, 'dashboard/partials/status_badge.html', {'listing': listing})
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def listing_edit(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = ListingForm(request.POST, instance=listing)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = ListingForm(instance=listing)
+    return render(request, 'listings/edit.html', {'form': form, 'listing': listing})
+
+@login_required
+@require_POST
+def toggle_favorite(request, pk):
+    listing = get_object_or_404(Listing, pk=pk)
+
+    favorite = Favorite.objects.filter(
+        user=request.user,
+        listing=listing
+    ).first()
+
+    if favorite:
+        favorite.delete()
+        is_favorite = False
+    else:
+        Favorite.objects.create(
+            user=request.user,
+            listing=listing
+        )
+        is_favorite = True
+
+    return render(
+        request,
+        "listings/partials/favorite_btn.html",
+        {
+            "listing": listing,
+            "is_favorite": is_favorite,
+        }
+    )
+
+@login_required
+def listings_favorite(request):
+
+    listings = Listing.objects.filter(
+        favorites__user=request.user
+    ).distinct()
+    context = {
+        'listings': listings
+        }
+    return render(request,'dashboard/favorite.html',context=context)

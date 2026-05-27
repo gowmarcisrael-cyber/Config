@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load listing_tags %}
+{% block title %}Tableau de bord — HAVEN{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Tableau de bord</h1>
+            <p class="text-sm text-gray-400 mt-1">Bienvenue, {{ request.user.username }}</p>
+        </div>
+        <a href="{% url 'create-listing' %}"
+           class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
+            + Publier une annonce
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+            <p class="text-2xl font-bold text-orange-500">{{ listings_count }}</p>
+            <p class="text-xs text-gray-400 mt-1">Annonces</p>
+        </div>
+        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+            <p class="text-2xl font-bold text-orange-500">{{ favorites_count }}</p>
+            <p class="text-xs text-gray-400 mt-1">Favoris</p>
+        </div>
+        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+            <p class="text-2xl font-bold text-orange-500">{{ visits_received_count }}</p>
+            <p class="text-xs text-gray-400 mt-1">Visites reçues</p>
+        </div>
+        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+            <p class="text-2xl font-bold text-orange-500">{{ visits_sent_count }}</p>
+            <p class="text-xs text-gray-400 mt-1">Visites envoyées</p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-6 border-b border-gray-100 mb-8 text-sm font-medium overflow-x-auto">
+        <a href="{% url 'dashboard' %}"
+           class="pb-3 whitespace-nowrap {% if active_tab == 'listings' %}border-b-2 border-orange-500 text-orange-500{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+            Mes annonces
+        </a>
+        <a href="{% url 'favorite' %}"
+           class="pb-3 whitespace-nowrap {% if active_tab == 'favorites' %}border-b-2 border-orange-500 text-orange-500{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+            Favoris
+        </a>
+        <a href="{% url 'visits_received' %}"
+           class="pb-3 whitespace-nowrap {% if active_tab == 'received' %}border-b-2 border-orange-500 text-orange-500{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+            Visites reçues
+            {% if visits_pending_count %}
+            <span class="ml-1 bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">{{ visits_pending_count }}</span>
+            {% endif %}
+        </a>
+        <a href="{% url 'visits_sent' %}"
+           class="pb-3 whitespace-nowrap {% if active_tab == 'sent' %}border-b-2 border-orange-500 text-orange-500{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+            Visites envoyées
+        </a>
+        <a href="{% url 'profile' %}"
+           class="pb-3 whitespace-nowrap {% if active_tab == 'profile' %}border-b-2 border-orange-500 text-orange-500{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+            Profil
+        </a>
+    </div>
+
+    <!-- Contenu onglet actif -->
+    {% block tab_content %}
+    <!-- Mes annonces -->
+    <div id="listings-list" class="space-y-4">
+        {% for listing in listings %}
+            {% include 'dashboard/partials/listing_row.html' %}
+        {% empty %}
+        <div class="text-center py-16 text-gray-400">
+            <p class="text-4xl mb-3">🏠</p>
+            <p class="text-sm">Vous n'avez pas encore d'annonces.</p>
+            <a href="{% url 'create-listing' %}" class="text-orange-500 font-medium hover:underline text-sm mt-2 inline-block">
+                Publier maintenant
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endblock %}
+
+</div>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.body.addEventListener('htmx:configRequest', (e) => {
+        e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+</script>
+{% endblock %}

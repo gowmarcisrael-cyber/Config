@@ -120,8 +120,8 @@
                 <button disabled class="w-full bg-orange-500 text-white font-semibold py-2.5 rounded-xl text-sm opacity-50 cursor-not-allowed mb-2">
                     Contacter le vendeur
                 </button>
-                <button disabled class="w-full border border-orange-400 text-orange-500 font-semibold py-2.5 rounded-xl text-sm opacity-50 cursor-not-allowed">
-                    Demander une visite
+                <button class="w-full border border-orange-400 text-orange-500 font-semibold py-2.5 rounded-xl text-sm opacity-50">
+                    <a href="{% url 'request_visit' listing.pk %}">Demander une visite</a>
                 </button>
                 <p class="text-center text-xs text-gray-400 mt-2">Bientôt disponible</p>
             </div>
@@ -130,12 +130,12 @@
     </div>
 
     <!-- Annonces similaires -->
-    {% if similar %}
+    {% if similars %}
     <div class="mt-14">
         <h2 class="text-lg font-semibold text-slate-800 mb-5">Annonces similaires</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {% for item in similar %}
-            <a href="{% url 'listing_detail' item.pk %}" class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 block">
+            {% for item in similars %}
+            <a href="{% url 'listing-detail' item.pk %}" class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 block">
                 <div class="h-40 bg-gray-100 relative">
                     {% if item.get_first_image %}
                         <img src="{{ item.get_first_image }}" alt="{{ item.title }}" class="w-full h-full object-cover">

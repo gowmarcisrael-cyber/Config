@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Contact — HAVEN{% endblock %}
+
+{% block content %}
+
+<!-- Hero parallax -->
+<div class="parallax py-32 px-6 flex items-center justify-center"
+     style="background-image: linear-gradient(rgba(15,23,42,0.8), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1600'); background-attachment: fixed; background-size: cover; background-position: center;">
+    <div class="text-center">
+        <p class="text-orange-400 text-xs font-semibold tracking-widest uppercase mb-4">Contactez-nous</p>
+        <h1 class="text-white text-5xl font-bold mb-4">On est là pour vous</h1>
+        <p class="text-gray-300 text-lg max-w-lg mx-auto">
+            Une question, une suggestion ? Notre équipe vous répond rapidement.
+        </p>
+    </div>
+</div>
+
+<!-- Infos + Formulaire -->
+<div class="bg-white py-24 px-6">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16">
+
+        <!-- Infos contact -->
+        <div>
+            <p class="text-orange-500 text-xs font-semibold tracking-widest uppercase mb-3">Nos coordonnées</p>
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 leading-tight">Parlons de votre projet</h2>
+
+            <div class="space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0 text-lg">📍</div>
+                    <div>
+                        <p class="font-semibold text-slate-700 text-sm mb-1">Adresse</p>
+                        <p class="text-gray-500 text-sm">Ouagadougou, Burkina Faso</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0 text-lg">📧</div>
+                    <div>
+                        <p class="font-semibold text-slate-700 text-sm mb-1">Email</p>
+                        <p class="text-gray-500 text-sm">contact@haven.bf</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0 text-lg">📞</div>
+                    <div>
+                        <p class="font-semibold text-slate-700 text-sm mb-1">Téléphone</p>
+                        <p class="text-gray-500 text-sm">+226 00 00 00 00</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0 text-lg">🕐</div>
+                    <div>
+                        <p class="font-semibold text-slate-700 text-sm mb-1">Horaires</p>
+                        <p class="text-gray-500 text-sm">Lun – Ven : 8h00 – 18h00</p>
+                        <p class="text-gray-500 text-sm">Sam : 9h00 – 13h00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Réseaux sociaux placeholder -->
+            <div class="mt-10">
+                <p class="text-sm font-semibold text-slate-700 mb-4">Suivez-nous</p>
+                <div class="flex gap-3">
+                    <button disabled class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 cursor-not-allowed text-sm font-bold">f</button>
+                    <button disabled class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 cursor-not-allowed text-sm font-bold">in</button>
+                    <button disabled class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 cursor-not-allowed text-sm font-bold">tw</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">Bientôt disponible</p>
+            </div>
+        </div>
+
+        <!-- Formulaire placeholder -->
+        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+            <h3 class="font-bold text-slate-800 mb-6">Envoyez-nous un message</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Nom complet</label>
+                    <input type="text" disabled placeholder="Votre nom"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                    <input type="email" disabled placeholder="votre@email.com"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Sujet</label>
+                    <input type="text" disabled placeholder="Objet de votre message"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Message</label>
+                    <textarea disabled rows="4" placeholder="Votre message..."
+                              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed resize-none"></textarea>
+                </div>
+                <button disabled
+                        class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl text-sm opacity-50 cursor-not-allowed">
+                    Envoyer le message
+                </button>
+                <p class="text-center text-xs text-gray-400">Formulaire disponible prochainement</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Parallax bas -->
+<div class="py-24 px-6"
+     style="background-image: linear-gradient(rgba(249,115,22,0.92), rgba(234,88,12,0.92)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600'); background-attachment: fixed; background-size: cover; background-position: center;">
+    <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-white text-3xl font-bold mb-4">Vous êtes propriétaire ?</h2>
+        <p class="text-orange-100 mb-8">Publiez votre annonce gratuitement et touchez des milliers d'acheteurs et locataires.</p>
+        <a href="{% url 'create-listing' %}"
+           class="bg-white text-orange-500 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors inline-block">
+            Publier une annonce
+        </a>
+    </div>
+</div>
+
+{% endblock %}

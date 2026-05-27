@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Demandes reçues — HAVEN{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-slate-800">Demandes reçues</h1>
+        <a href="{% url 'dashboard' %}" class="text-sm text-orange-500 hover:underline">← Tableau de bord</a>
+    </div>
+
+    <div class="space-y-4">
+        {% for visit in visits %}
+        <div id="visit-{{ visit.pk }}" class="bg-white border border-gray-100 rounded-2xl p-5 flex gap-4 items-center">
+            <div class="w-16 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                {% if visit.listing.get_first_image %}
+                    <img src="{{ visit.listing.get_first_image }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-xl">🏠</div>
+                {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-slate-800 text-sm truncate">{{ visit.listing.title }}</h3>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    👤 {{ visit.sender.username }} · 📅 {{ visit.date|date:"d/m/Y à H:i" }}
+                </p>
+                {% if visit.message %}
+                <p class="text-xs text-gray-500 mt-1">{{ visit.message }}</p>
+                {% endif %}
+            </div>
+            <div class="flex-shrink-0 flex items-center gap-2">
+                {% include 'visits/partials/visits_status.html' %}
+                {% if visit.status == 'En attente' %}
+                <button hx-post="{% url 'update_visit_status' visit.pk %}"
+                        hx-vals='{"status": "Acceptée"}'
+                        hx-target="#visit-{{ visit.pk }} .visit-status"
+                        hx-swap="outerHTML"
+                        class="text-xs font-medium px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
+                    Accepter
+                </button>
+                <button hx-post="{% url 'update_visit_status' visit.pk %}"
+                        hx-vals='{"status": "Refusée"}'
+                        hx-target="#visit-{{ visit.pk }} .visit-status"
+                        hx-swap="outerHTML"
+                        class="text-xs font-medium px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
+                    Refuser
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-16 text-gray-400">
+            <p class="text-4xl mb-3">📬</p>
+            <p class="text-sm">Aucune demande reçue.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
