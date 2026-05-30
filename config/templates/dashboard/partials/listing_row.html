@@ -1,29 +1,32 @@
 <div id="listing-{{ listing.pk }}"
-     class="bg-white border border-gray-100 rounded-2xl p-4 flex gap-4 items-center">
+     class="bg-white border border-gray-100 rounded-2xl p-4">
 
-    <!-- Image -->
-    <div class="w-20 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-        {% if listing.get_first_image %}
-            <img src="{{ listing.get_first_image }}" class="w-full h-full object-cover">
-        {% else %}
-            <div class="w-full h-full flex items-center justify-center text-2xl">🏠</div>
-        {% endif %}
+    <div class="flex gap-4 items-start">
+        <!-- Image -->
+        <div class="w-20 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+            {% if listing.get_first_image %}
+                <img src="{{ listing.get_first_image }}" class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-2xl">🏠</div>
+            {% endif %}
+        </div>
+
+        <!-- Infos -->
+        <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-slate-800 text-sm truncate">{{ listing.title }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">📍 {{ listing.city }} · {{ listing.created_at|date:"d/m/Y" }}</p>
+            <p class="text-orange-500 font-bold text-sm mt-1">{{ listing.price|floatformat:0 }} FCFA</p>
+        </div>
+
+        <!-- Badge statut -->
+        <div class="flex-shrink-0">
+            {% include 'dashboard/partials/status_badge.html' %}
+        </div>
     </div>
 
-    <!-- Infos -->
-    <div class="flex-1 min-w-0">
-        <h3 class="font-semibold text-slate-800 text-sm truncate">{{ listing.title }}</h3>
-        <p class="text-xs text-gray-400 mt-0.5">📍 {{ listing.city }} · {{ listing.created_at|date:"d/m/Y" }}</p>
-        <p class="text-orange-500 font-bold text-sm mt-1">{{ listing.price|floatformat:0 }} FCFA</p>
-    </div>
-
-    <!-- Statut -->
-    <div class="flex-shrink-0">
-        {% include 'dashboard/partials/status_badge.html' %}
-    </div>
-
-    <!-- Changer statut -->
-    <div class="flex-shrink-0">
+    <!-- Actions mobile -->
+    <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-50">
+        <!-- Changer statut -->
         <select name="status"
                 hx-post="{% url 'listing_change_status' listing.pk %}"
                 hx-target="#listing-{{ listing.pk }} .status-badge"
@@ -34,22 +37,20 @@
             <option value="{{ value }}" {% if listing.status == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-    </div>
 
-    <!-- Actions -->
-    <div class="flex gap-2 flex-shrink-0">
-        <a href="{% url 'listing_edit' listing.pk %}"
-           class="border border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-500 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
-            Modifier
-        </a>
-        <button class="border border-red-100 text-red-400 hover:bg-red-50 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                hx-post="{% url 'listing_delete' listing.pk %}"
-                hx-target="#listing-{{ listing.pk }}"
-                hx-swap="outerHTML swap:300ms"
-                hx-confirm="Supprimer cette annonce ?"
-                {% csrf_token %}>
-            Supprimer
-        </button>
+        <div class="flex gap-2 ml-auto">
+            <a href="{% url 'listing_edit' listing.pk %}"
+               class="border border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-500 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+                Modifier
+            </a>
+            <button hx-post="{% url 'listing_delete' listing.pk %}"
+                    hx-target="#listing-{{ listing.pk }}"
+                    hx-swap="outerHTML swap:300ms"
+                    hx-confirm="Supprimer cette annonce ?"
+                    class="border border-red-100 text-red-400 hover:bg-red-50 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+                Supprimer
+            </button>
+        </div>
     </div>
 
 </div>

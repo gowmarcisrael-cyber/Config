@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from PIL import Image as PilImage
+import os
 
 # Create your models here.
 class Listing(models.Model):
@@ -46,6 +48,23 @@ class Images(models.Model):
 
     class Meta:
         ordering = ['listing']
+
+    def save(self,*args,**kwargs):
+        super().save(*args,**kwargs)
+        self.compress()
+    
+    def compress(self):
+        img = PilImage.open(self.image.path)
+        if img.mode in ('RGBA','P'):
+            img.convert('RGB')
+
+        max_width = 1200
+        if img.width > max_width:
+            ratio = max_width/img.width
+            new_height = int(img.height*ratio)
+            img = img.resize((max_width, new_height), PilImage.Resampling.LANCZOS)
+
+        img.save(self.image.path, 'JPEG', quality=85, optimize=True)
 
     def __str__(self):
         return f'({self.listing})-({self.id})'

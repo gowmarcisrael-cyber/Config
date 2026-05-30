@@ -22,7 +22,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Type de bien</label>
                     <select name="property_type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                         {% for value, label in form.fields.property_type.choices %}
@@ -30,7 +30,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Statut</label>
                     <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                         {% for value, label in form.fields.status.choices %}
@@ -58,12 +58,12 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Latitude</label>
                     <input type="number" step="any" name="latitude" value="{{ form.latitude.value|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                 </div>
-                <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Longitude</label>
                     <input type="number" step="any" name="longitude" value="{{ form.longitude.value|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">

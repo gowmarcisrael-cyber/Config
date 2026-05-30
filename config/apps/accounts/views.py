@@ -49,6 +49,15 @@ def logout_view(request):
 
 @login_required
 def profile(request):
+    if request.method == 'POST':
+        avatar = request.FILES['avatar']
+        if avatar:
+            if request.user.avatar:
+                request.user.avatar.remove()
+            request.user.avatar = avatar
+            request.user.save()
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
     return render(request,'accounts/profile/profile.html')
 
 def edit_profile(request):
