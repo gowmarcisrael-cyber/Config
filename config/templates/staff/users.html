@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Staff — Utilisateurs{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Gestion des utilisateurs</h1>
+            <p class="text-sm text-gray-400 mt-1">{{ users.paginator.count }} utilisateurs au total</p>
+        </div>
+        <a href="{% url 'staff_listings' %}" class="text-sm text-orange-500 hover:underline">← Annonces</a>
+    </div>
+
+    <!-- Recherche -->
+    <form method="get" class="bg-white border border-gray-100 rounded-2xl p-4 mb-6 flex gap-3 items-end">
+        <div class="flex-1">
+            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Recherche</label>
+            <input type="text" name="search" value="{{ filters.search }}" placeholder="Nom d'utilisateur ou email..."
+                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+        <button type="submit" class="bg-orange-500 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-orange-600 transition-colors">
+            Rechercher
+        </button>
+    </form>
+
+    <!-- Table -->
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Utilisateur</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Email</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Inscrit le</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Annonces</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for user in users %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-sm">👤</div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-700">{{ user.username }}</p>
+                                <p class="text-xs text-gray-400 md:hidden">{{ user.email }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ user.email }}</td>
+                    <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ user.date_joined|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ user.listing_set.count }}</td>
+                    <td class="px-4 py-3">
+                        {% include 'staff/partials/toggle_user_btn.html' %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-16 text-center text-gray-400">Aucun utilisateur.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if users.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if users.has_previous %}
+        <a href="?{{ filters.urlencode }}&page={{ users.previous_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">←</a>
+        {% endif %}
+        {% for num in users.paginator.page_range %}
+        <a href="?{{ filters.urlencode }}&page={{ num }}"
+           class="px-4 py-2 rounded-lg border text-sm
+               {% if users.number == num %}bg-orange-500 text-white border-orange-500{% else %}border-gray-200 hover:border-orange-400{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
+        {% if users.has_next %}
+        <a href="?{{ filters.urlencode }}&page={{ users.next_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.body.addEventListener('htmx:configRequest', (e) => {
+        e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+</script>
+{% endblock %}

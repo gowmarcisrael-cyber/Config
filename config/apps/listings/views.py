@@ -6,7 +6,10 @@ from .forms import ListingForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from apps.visits.models import Visit
-
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
 # Create your views here.
 
 def home(request):
@@ -165,3 +168,110 @@ def listings_favorite(request):
         'listings': listings
         }
     return render(request,'dashboard/favorite.html',context=context)
+
+# Vue réservé au staff
+@staff_member_required
+def staff_listings(request):
+    listings = Listing.objects.all().order_by('-created_at')
+
+    # Filtres
+    status = request.GET.get('status')
+    is_approved = request.GET.get('is_approved')
+    search = request.GET.get('search')
+
+    if status:
+        listings = listings.filter(status=status)
+    if is_approved == '1':
+        listings = listings.filter(is_approved=True)
+    elif is_approved == '0':
+        listings = listings.filter(is_approved=False)
+    if search:
+        listings = listings.filter(title__icontains=search)
+
+    page = request.GET.get('page')
+    listings = Paginator(listings, 10).get_page(page)
+
+    context = {
+        'listings': listings,
+        'statuses': Listing.STATUS,
+        'filters': request.GET,
+    }
+    return render(request, 'staff/listings.html', context=context)
+
+@staff_member_required
+@require_POST
+def staff_approve_listing(request, pk):
+    listing = get_object_or_404(Listing,pk=pk)
+    listing.is_approved = not listing.is_approved
+    listing.save()
+    context = {
+        'listing':listing
+    }
+    return render(request,'staff/partials/approve_listing.html',
+                  context=context)
+
+@staff_member_required
+def staff_users(request):
+    User = get_user_model()
+    users = User.objects.exclude(is_staff=True).order_by('-date_joined')
+
+    search = request.GET.get('search')
+    if search:
+        users = users.filter(username__icontains=search) | users.filter(email__icontains=search)
+
+    page = request.GET.get('page')
+    users = Paginator(users, 30).get_page(page)
+
+    context = {
+        'users': users,
+        'filters': request.GET,
+    }
+    return render(request, 'staff/users.html', context=context)
+
+@staff_member_required
+@require_POST
+def staff_toggle_user(request, pk):
+    User = get_object_or_404(get_user_model(), pk=pk)
+    User.is_active = not User.is_active
+    User.save()
+    context = {
+        'user': User,
+    }
+    return render(request, 'staff/partials/toggle_user_btn.html', context=context)
+
+from django.utils import timezone
+from datetime import timedelta
+
+@staff_member_required
+def staff_stats(request):
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
+    listings_count = Listing.objects.count()
+    approved_listings_count = Listing.objects.filter(is_approved=True).count()
+    not_approved_listings_count = listings_count - approved_listings_count
+    recent_listings_count = Listing.objects.filter(created_at__gte=thirty_days_ago).count()
+
+    User = get_user_model()
+    users_count = User.objects.count()
+    active_users_count = User.objects.filter(is_active=True).count()
+    not_active_users_count = users_count - active_users_count
+    recent_users_count = User.objects.filter(date_joined__gte=thirty_days_ago).count()
+
+    visits_count = Visit.objects.count()
+    pending_visits_count = Visit.objects.filter(status='En attente').count()
+    accepted_visits_count = Visit.objects.filter(status='Acceptée').count()
+
+    context = {
+        'listings_count': listings_count,
+        'approved_listings_count': approved_listings_count,
+        'not_approved_listings_count': not_approved_listings_count,
+        'recent_listings_count': recent_listings_count,
+        'users_count': users_count,
+        'active_users_count': active_users_count,
+        'not_active_users_count': not_active_users_count,
+        'recent_users_count': recent_users_count,
+        'visits_count': visits_count,
+        'pending_visits_count': pending_visits_count,
+        'accepted_visits_count': accepted_visits_count,
+    }
+    return render(request, 'staff/stats.html', context=context)

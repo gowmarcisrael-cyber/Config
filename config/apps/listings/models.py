@@ -32,6 +32,7 @@ class Listing(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     created_at = models.DateTimeField(auto_now_add=True)
     area = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
     def __str__(self):
         return f'{self.title} - {self.id}'
     

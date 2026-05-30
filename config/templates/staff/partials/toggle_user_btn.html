@@ -1,0 +1,8 @@
+<button hx-post="{% url 'staff_toggle_user' user.pk %}"
+        hx-target="this"
+        hx-swap="outerHTML"
+        class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors
+            {% if user.is_active %}bg-green-100 text-green-700 hover:bg-red-50 hover:text-red-500
+            {% else %}bg-red-50 text-red-400 hover:bg-green-100 hover:text-green-700{% endif %}">
+    {% if user.is_active %}✅ Actif{% else %}🚫 Désactivé{% endif %}
+</button>
