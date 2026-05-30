@@ -1,6 +1,7 @@
 <span class="visit-status text-xs font-semibold px-2.5 py-1 rounded-full
     {% if visit.status == 'En attente' %}bg-yellow-100 text-yellow-700
     {% elif visit.status == 'Acceptée' %}bg-green-100 text-green-700
+    {% elif visit.status == 'Annulée' %}bg-gray-100 text-gray-500
     {% else %}bg-red-100 text-red-500{% endif %}">
     {{ visit.status }}
 </span>

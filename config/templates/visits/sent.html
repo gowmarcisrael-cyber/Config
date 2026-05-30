@@ -29,6 +29,15 @@
             <div class="flex-shrink-0">
                 {% include 'visits/partials/visits_status.html' %}
             </div>
+            {% if visit.status != 'Annulée' and visit.status != 'Refusée' %}
+            <button hx-post="{% url 'cancel_visit' visit.pk %}"
+                    hx-target=".visit-status"
+                    hx-swap="outerHTML"
+                    hx-confirm="Annuler cette visite ?"
+                    class="text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
+                Annuler
+            </button>
+{% endif %}
         </div>
         {% empty %}
         <div class="text-center py-16 text-gray-400">

@@ -8,6 +8,7 @@ class Visit(models.Model):
         ('En attente', 'En attente'),
         ('Acceptée', 'Acceptée'),
         ('Refusée', 'Refusée'),
+        ('Annulée', 'Annuléé')
     ]
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='visits')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='visits_sent')

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .models import Visit
@@ -50,4 +51,22 @@ def update_visit_status(request, pk):
     if new_status in dict(Visit.STATUS):
         visit.status = new_status
         visit.save()
+    return render(request, 'visits/partials/visit_status.html', {'visit': visit})
+
+@login_required
+@require_POST
+def cancel_visit(request, pk):
+    visit = get_object_or_404(Visit, pk=pk)
+    
+    # Vérifier que c'est bien l'envoyeur ou le receveur
+    if request.user != visit.sender and request.user != visit.receiver:
+        return HttpResponse(status=403)
+    
+    # Ne peut pas annuler une visite déjà annulée ou refusée
+    if visit.status in ('Annulée', 'Refusée'):
+        return HttpResponse(status=400)
+    
+    visit.status = 'Annulée'
+    visit.save()
+    
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})
