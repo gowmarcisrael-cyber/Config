@@ -11,10 +11,11 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from apps.reports.models import Report
+from django.contrib.postgres.search import SearchQuery,SearchVector,SearchRank
 # Create your views here.
 
 def home(request):
-    listings = Listing.objects.all()[:6]
+    listings = Listing.objects.filter(is_available=True,is_approved=True)[:6]
     context = {
         'listings':listings,
         'types':Listing.TYPES,
@@ -23,12 +24,13 @@ def home(request):
     return render(request,'listings/index.html',context=context)
 
 def search(request):
-    listings = Listing.objects.filter(is_available=True)
+    listings = Listing.objects.filter(is_available=True,is_approved=True)
 
     status = request.GET.get('status')
     city = request.GET.get('city')
     property_type = request.GET.get('property_type')
     price_max = request.GET.get('price_max')
+    query = request.GET.get('q')
 
     if status:
         listings = listings.filter(status=status)
@@ -38,6 +40,14 @@ def search(request):
         listings = listings.filter(property_type=property_type)
     if price_max:
         listings = listings.filter(price__lte=price_max)
+
+    if query:
+        search_vector = SearchVector('title', weight='A') + SearchVector('description', weight='B') + SearchVector('city', weight='C')
+        search_query = SearchQuery(query)
+        listings = listings.annotate(
+            rank=SearchRank(search_vector, search_query)
+        ).filter(rank__gte=0).order_by('-rank')
+
 
     page = request.GET.get('page')
     listings = Paginator(listings, 6).get_page(page)
@@ -188,7 +198,9 @@ def staff_listings(request):
     elif is_approved == '0':
         listings = listings.filter(is_approved=False)
     if search:
-        listings = listings.filter(title__icontains=search)
+        listings = listings.annotate(
+            rank=SearchRank(SearchVector('title',weight='A'),SearchQuery(search))
+        ).filter(rank__gte=0.1).order_by('-rank')
 
     page = request.GET.get('page')
     listings = Paginator(listings, 10).get_page(page)
@@ -219,7 +231,11 @@ def staff_users(request):
 
     search = request.GET.get('search')
     if search:
-        users = users.filter(username__icontains=search) | users.filter(email__icontains=search)
+        search_vector = SearchVector('username', weight='A') + SearchVector('email', weight='B')
+        search_query = SearchQuery(search)
+        users = users.annotate(
+            rank=SearchRank(search_vector, search_query)
+        ).filter(rank__gte=0.1).order_by('-rank')
 
     page = request.GET.get('page')
     users = Paginator(users, 30).get_page(page)
@@ -240,9 +256,6 @@ def staff_toggle_user(request, pk):
         'user': User,
     }
     return render(request, 'staff/partials/toggle_user_btn.html', context=context)
-
-from django.utils import timezone
-from datetime import timedelta
 
 @staff_member_required
 def staff_stats(request):

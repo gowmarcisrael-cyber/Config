@@ -51,7 +51,7 @@
                     </td>
                     <td class="px-4 py-3 text-gray-500 hidden md:table-cell">
                         {% if report.listing %}
-                            <a href="{% url 'listing-detail' report.listing.pk %}" target="_blank"
+                            <a href="{% url 'listing_detail' report.listing.pk %}" target="_blank"
                                class="text-orange-500 hover:underline">{{ report.listing.title|truncatechars:30 }}</a>
                         {% elif report.reported_user %}
                             {{ report.reported_user.username }}

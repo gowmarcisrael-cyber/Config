@@ -20,7 +20,7 @@ def report_listing(request, pk):
 
     # Eviter les doublons
     if Report.objects.filter(author=request.user, listing=listing).exists():
-        return redirect('listing_detail', pk=pk)
+        return redirect('listing_detail', id=pk)
 
     reason = request.POST.get('reason')
     message = request.POST.get('message', '')
