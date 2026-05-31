@@ -10,6 +10,7 @@
             <p class="text-sm text-gray-400 mt-1">{{ listings.paginator.count }} annonces au total</p>
         </div>
         <a href="{% url 'staff_users' %}" class="text-sm text-orange-500 hover:underline">Gérer les utilisateurs →</a>
+        <a href="{% url 'staff_reports' %}" class="text-sm text-orange-500 hover:underline">Signalement</a>
     </div>
 
     <!-- Filtres -->
@@ -83,7 +84,7 @@
                         </span>
                     </td>
                     <td class="px-4 py-3">
-                        {% include 'staff/partials/approve_btn.html' %}
+                        {% include 'staff/partials/approve_listing.html' %}
                     </td>
                     <td class="px-4 py-3">
                         <a href="{% url 'listing-detail' listing.pk %}" target="_blank"

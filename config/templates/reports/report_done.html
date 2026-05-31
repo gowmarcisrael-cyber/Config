@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Signalement envoyé — HAVEN{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-6">
+    <div class="bg-white border border-gray-100 rounded-2xl p-10 max-w-md w-full text-center">
+        <div class="text-5xl mb-4">✅</div>
+        <h1 class="text-xl font-bold text-slate-800 mb-2">Signalement envoyé</h1>
+        <p class="text-sm text-gray-400 mb-6">
+            Merci pour votre signalement. Notre équipe va examiner le contenu dans les plus brefs délais.
+        </p>
+        <div class="bg-gray-50 rounded-xl p-4 text-left mb-6 text-sm">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-400">Raison</span>
+                <span class="font-medium text-slate-700">{{ report.reason }}</span>
+            </div>
+            {% if report.message %}
+            <div class="flex justify-between">
+                <span class="text-gray-400">Message</span>
+                <span class="font-medium text-slate-700 text-right max-w-xs">{{ report.message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'home' %}" class="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+                Accueil
+            </a>
+            <form method="post" action="{% url 'delete_report' report.pk %}" class="flex-1">
+                {% csrf_token %}
+                <button type="submit" class="w-full border border-red-100 text-red-400 font-medium py-2.5 rounded-xl text-sm hover:bg-red-50 transition-colors">
+                    Annuler le signalement
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

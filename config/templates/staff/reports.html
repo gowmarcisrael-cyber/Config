@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Staff — Signalements{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Signalements</h1>
+            <p class="text-sm text-gray-400 mt-1">{{ reports.paginator.count }} signalements au total</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'staff_listings' %}" class="text-sm text-orange-500 hover:underline">Annonces</a>
+            <a href="{% url 'staff_users' %}" class="text-sm text-orange-500 hover:underline">Utilisateurs</a>
+        </div>
+    </div>
+
+    <!-- Filtre -->
+    <form method="get" class="bg-white border border-gray-100 rounded-2xl p-4 mb-6 flex gap-3 items-end">
+        <div>
+            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Statut</label>
+            <select name="is_resolved" class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <option value="">Tous</option>
+                <option value="0" {% if filters.is_resolved == '0' %}selected{% endif %}>Non résolus</option>
+                <option value="1" {% if filters.is_resolved == '1' %}selected{% endif %}>Résolus</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-orange-500 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-orange-600 transition-colors">
+            Filtrer
+        </button>
+    </form>
+
+    <!-- Table -->
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Auteur</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Cible</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Raison</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Message</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide hidden md:table-cell">Date</th>
+                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for report in reports %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3">
+                        <p class="font-medium text-slate-700">{{ report.author.username }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 hidden md:table-cell">
+                        {% if report.listing %}
+                            <a href="{% url 'listing-detail' report.listing.pk %}" target="_blank"
+                               class="text-orange-500 hover:underline">{{ report.listing.title|truncatechars:30 }}</a>
+                        {% elif report.reported_user %}
+                            {{ report.reported_user.username }}
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-400">
+                            {{ report.reason }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 text-xs hidden md:table-cell max-w-xs truncate">
+                        {{ report.message|default:"—" }}
+                    </td>
+                    <td class="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">
+                        {{ report.created_at|date:"d/m/Y" }}
+                    </td>
+                    <td class="px-4 py-3">
+                        {% include 'staff/partials/report_resolve_btn.html' %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-4 py-16 text-center text-gray-400">Aucun signalement.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if reports.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if reports.has_previous %}
+        <a href="?{{ filters.urlencode }}&page={{ reports.previous_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">←</a>
+        {% endif %}
+        {% for num in reports.paginator.page_range %}
+        <a href="?{{ filters.urlencode }}&page={{ num }}"
+           class="px-4 py-2 rounded-lg border text-sm
+               {% if reports.number == num %}bg-orange-500 text-white border-orange-500{% else %}border-gray-200 hover:border-orange-400{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
+        {% if reports.has_next %}
+        <a href="?{{ filters.urlencode }}&page={{ reports.next_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.body.addEventListener('htmx:configRequest', (e) => {
+        e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+</script>
+{% endblock %}

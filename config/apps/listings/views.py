@@ -10,6 +10,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from apps.reports.models import Report
 # Create your views here.
 
 def home(request):
@@ -59,7 +60,8 @@ def detail(request,id):
     context = {
         'listing': listing,
         'images': images,
-        'similars': similars
+        'similars': similars,
+        'report_reasons': Report.REASONS,
     }
     return render(request, 'listings/details.html', context=context)
 
@@ -261,6 +263,10 @@ def staff_stats(request):
     pending_visits_count = Visit.objects.filter(status='En attente').count()
     accepted_visits_count = Visit.objects.filter(status='Acceptée').count()
 
+    repported_listing_count = Report.objects.count()
+    resolved_reported_listing_count = Report.objects.filter(is_resolved=True).count()
+    not_resolved_reported_listing_count = repported_listing_count - resolved_reported_listing_count 
+
     context = {
         'listings_count': listings_count,
         'approved_listings_count': approved_listings_count,
@@ -273,5 +279,35 @@ def staff_stats(request):
         'visits_count': visits_count,
         'pending_visits_count': pending_visits_count,
         'accepted_visits_count': accepted_visits_count,
+        'reported_listing_count':repported_listing_count,
+        'resolved_reported_listing_count':resolved_reported_listing_count,
+        'not_resolved_reported_listing_count':not_resolved_reported_listing_count,
     }
     return render(request, 'staff/stats.html', context=context)
+
+@staff_member_required
+def staff_reports(request):
+    reports = Report.objects.all().order_by('-created_at').select_related('author', 'listing', 'reported_user')
+
+    is_resolved = request.GET.get('is_resolved')
+    if is_resolved == '1':
+        reports = reports.filter(is_resolved=True)
+    elif is_resolved == '0':
+        reports = reports.filter(is_resolved=False)
+
+    page = request.GET.get('page')
+    reports = Paginator(reports, 10).get_page(page)
+
+    context = {
+        'reports': reports,
+        'filters': request.GET,
+    }
+    return render(request, 'staff/reports.html', context=context)
+
+@staff_member_required
+@require_POST
+def resolve_report(request, pk):
+    report = get_object_or_404(Report, pk=pk)
+    report.is_resolved = not report.is_resolved
+    report.save()
+    return render(request, 'staff/partials/report_resolve_btn.html', {'report': report})
