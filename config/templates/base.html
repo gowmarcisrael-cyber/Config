@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,6 +10,7 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="icon" href="{% static 'images/haven_logo.svg' %}" type="image/x-icon">
     {% block extra_head %}{% endblock %}
     {% block extra_scripts %}{% endblock %}
 </head>
@@ -18,7 +20,7 @@
     <nav class="bg-white border-b border-gray-100 sticky top-0 z-50" x-data="{ open: false }">
         <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         
-        <a href="{% url 'home' %}" class="text-2xl font-bold text-orange-500 tracking-tight">HAVEN</a>
+        <img src="{% static 'images/haven_logo.svg' %}" alt="HAVEN" class="h-8">
 
         <!-- Liens desktop -->
         <div class="hidden md:flex gap-6 text-sm font-medium text-gray-500">
