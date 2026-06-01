@@ -65,46 +65,89 @@
                 <span class="text-gray-400 font-normal text-xs ml-1">— cliquez pour placer le marqueur</span>
             </label>
             <div id="map" class="w-full h-64 rounded-xl border border-gray-200 mb-3">
-        <script>
-            const initLat = {{ form.latitude.value|default:'12.3714' }};
-            const initLng = {{ form.longitude.value|default:'-1.5197' }};
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const initLat = {{ form.latitude.value|default:'12.3714' }};
+                    const initLng = {{ form.longitude.value|default:'-1.5197' }};
 
-            const map = L.map('map').setView([initLat, initLng], 13);
+                    const map = L.map('map').setView([initLat, initLng], 13);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
 
-            let marker = null;
+                    let marker = null;
 
-            // Si coordonnées existantes, place le marker
-            {% if form.latitude.value and form.longitude.value %}
-            marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
-            marker.on('dragend', updateCoords);
-            {% endif %}
-
-            map.on('click', function(e) {
-                const { lat, lng } = e.latlng;
-
-                if (marker) {
-                    marker.setLatLng([lat, lng]);
-                } else {
-                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    // Si coordonnées existantes, place le marker
+                    {% if form.latitude.value and form.longitude.value %}
+                    marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
                     marker.on('dragend', updateCoords);
-                }
-                updateCoords({ target: marker });
-            });
+                    {% endif %}
 
-            function updateCoords(e) {
-                const pos = e.target.getLatLng();
-                const lat = pos.lat.toFixed(6);
-                const lng = pos.lng.toFixed(6);
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
-                document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
-            }
-        </script>
+                    map.on('click', function(e) {
+                        const { lat, lng } = e.latlng;
+
+                        if (marker) {
+                            marker.setLatLng([lat, lng]);
+                        } else {
+                            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                            marker.on('dragend', updateCoords);
+                        }
+                        updateCoords({ target: marker });
+                    });
+
+                    function updateCoords(e) {
+                        const pos = e.target.getLatLng();
+                        const lat = pos.lat.toFixed(6);
+                        const lng = pos.lng.toFixed(6);
+                        document.getElementById('latitude').value = lat;
+                        document.getElementById('longitude').value = lng;
+                        document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
+                    }
+                    document.getElementById('geolocate').addEventListener('click', function() {
+                    if (!navigator.geolocation) {
+                        alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                        return;
+                    }
+
+                    this.textContent = '⏳ Localisation...';
+                    this.disabled = true;
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+
+                            map.setView([lat, lng], 16);
+
+                            if (marker) {
+                                marker.setLatLng([lat, lng]);
+                            } else {
+                                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                marker.on('dragend', updateCoords);
+                            }
+
+                            document.getElementById('latitude').value = lat.toFixed(6);
+                            document.getElementById('longitude').value = lng.toFixed(6);
+                            document.getElementById('coords-display').textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+                            this.textContent = '📍 Me localiser';
+                            this.disabled = false;
+                        },
+                        (error) => {
+                            alert('Impossible de vous localiser. Vérifiez les permissions.');
+                            this.textContent = '📍 Me localiser';
+                            this.disabled = false;
+                        }
+                    );
+                });
+            });
+            </script>
             </div>
+            <button type="button" id="geolocate"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                📍 Me localiser
+            </button>
         </div>
 
         <!-- Champs cachés -->
