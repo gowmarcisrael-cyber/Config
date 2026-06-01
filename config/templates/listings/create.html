@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Publier une annonce — HAVEN{% endblock %}
 
+
 {% block content %}
 <div class="max-w-2xl mx-auto px-6 py-10">
 
@@ -48,28 +49,77 @@
         </div>
 
         <!-- Localisation -->
-        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Localisation</h2>
+        <!-- Localisation -->
+    <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+        <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Localisation</h2>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Ville</label>
-                <input type="text" name="city" value="{{ form.city.value|default:'' }}"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-            </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Ville</label>
+            <input type="text" name="city" value="{{ form.city.value|default:'' }}"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Latitude</label>
-                    <input type="number" step="any" name="latitude" value="{{ form.latitude.value|default:'' }}"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Longitude</label>
-                    <input type="number" step="any" name="longitude" value="{{ form.longitude.value|default:'' }}"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">
+                Positionnez votre bien sur la carte
+                <span class="text-gray-400 font-normal text-xs ml-1">— cliquez pour placer le marqueur</span>
+            </label>
+            <div id="map" class="w-full h-64 rounded-xl border border-gray-200 mb-3">
+        <script>
+            const initLat = {{ form.latitude.value|default:'12.3714' }};
+            const initLng = {{ form.longitude.value|default:'-1.5197' }};
+
+            const map = L.map('map').setView([initLat, initLng], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            let marker = null;
+
+            // Si coordonnées existantes, place le marker
+            {% if form.latitude.value and form.longitude.value %}
+            marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+            marker.on('dragend', updateCoords);
+            {% endif %}
+
+            map.on('click', function(e) {
+                const { lat, lng } = e.latlng;
+
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                } else {
+                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    marker.on('dragend', updateCoords);
+                }
+                updateCoords({ target: marker });
+            });
+
+            function updateCoords(e) {
+                const pos = e.target.getLatLng();
+                const lat = pos.lat.toFixed(6);
+                const lng = pos.lng.toFixed(6);
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+                document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
+            }
+        </script>
             </div>
         </div>
+
+        <!-- Champs cachés -->
+        <input type="hidden" name="latitude" id="latitude" value="{{ form.latitude.value|default:'' }}">
+        <input type="hidden" name="longitude" id="longitude" value="{{ form.longitude.value|default:'' }}">
+
+        <!-- Coordonnées affichées -->
+        <p id="coords-display" class="text-xs text-gray-400">
+            {% if form.latitude.value and form.longitude.value %}
+                📍 {{ form.latitude.value }}, {{ form.longitude.value }}
+            {% else %}
+                📍 Aucune position sélectionnée
+            {% endif %}
+        </p>
+    </div>
 
         <!-- Caractéristiques -->
         <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">

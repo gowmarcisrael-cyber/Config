@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HAVEN{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    {% block extra_head %}{% endblock %}
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    {% block extra_head %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
 </head>
+
+
 <body class="bg-gray-50 font-sans">
     <nav class="bg-white border-b border-gray-100 sticky top-0 z-50" x-data="{ open: false }">
         <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">

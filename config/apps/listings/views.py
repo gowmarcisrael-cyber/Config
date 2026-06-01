@@ -86,7 +86,7 @@ def create_listing(request):
             listing.save()
             for image in images:
                 listing.images.create(image=image)
-            return redirect('listing-detail', id=listing.id)
+            return redirect('listing_detail', id=listing.id)
     else:
         form = ListingForm()
     return render(request, 'listings/create.html', {'form': form})

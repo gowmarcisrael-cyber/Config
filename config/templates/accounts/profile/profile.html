@@ -14,7 +14,9 @@
 
     {% if messages %}
     {% for message in messages %}
-    <div class="bg-green-50 text-green-700 text-sm rounded-xl px-4 py-3 mb-6">{{ message }}</div>
+    <div class="{% if message.tags == 'error' %}bg-red-50 text-red-600{% else %}bg-green-50 text-green-700{% endif %} text-sm rounded-xl px-4 py-3 mb-6">
+        {{ message }}
+    </div>
     {% endfor %}
     {% endif %}
 
@@ -53,28 +55,26 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Prénom</label>
-                    <input type="text" name="first_name" value="{{ profile_form.first_name.value|default:'' }}"
+                    <input type="text" name="first_name" value="{{ user.first_name|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Nom</label>
-                    <input type="text" name="last_name" value="{{ profile_form.last_name.value|default:'' }}"
+                    <input type="text" name="last_name" value="{{ user.last_name|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                 </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-600 mb-1">Nom d'utilisateur</label>
-                <input type="text" name="username" value="{{ profile_form.username.value|default:'' }}"
+                <input type="text" name="username" value="{{ user.username|default:'' }}"
                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                {% if profile_form.username.errors %}<p class="text-xs text-red-500 mt-1">{{ profile_form.username.errors.0 }}</p>{% endif %}
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                <input type="email" name="email" value="{{ profile_form.email.value|default:'' }}"
+                <input type="email" name="email" value="{{ user.email|default:'' }}"
                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                {% if profile_form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ profile_form.email.errors.0 }}</p>{% endif %}
             </div>
 
             <button type="submit"
@@ -95,21 +95,18 @@
                 <label class="block text-sm font-medium text-gray-600 mb-1">Mot de passe actuel</label>
                 <input type="password" name="old_password"
                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                {% if password_form.old_password.errors %}<p class="text-xs text-red-500 mt-1">{{ password_form.old_password.errors.0 }}</p>{% endif %}
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-600 mb-1">Nouveau mot de passe</label>
                 <input type="password" name="new_password1"
                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                {% if password_form.new_password1.errors %}<p class="text-xs text-red-500 mt-1">{{ password_form.new_password1.errors.0 }}</p>{% endif %}
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-600 mb-1">Confirmer le mot de passe</label>
                 <input type="password" name="new_password2"
                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                {% if password_form.new_password2.errors %}<p class="text-xs text-red-500 mt-1">{{ password_form.new_password2.errors.0 }}</p>{% endif %}
             </div>
 
             <button type="submit"

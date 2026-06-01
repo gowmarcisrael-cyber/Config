@@ -128,6 +128,28 @@
         </div>
 
     </div>
+    <!-- Carte -->
+    {% if listing.latitude and listing.longitude %}
+    <div class="mt-8">
+        <h2 class="text-base font-semibold text-slate-800 mb-3">Localisation</h2>
+        <div id="map" class="w-full h-64 rounded-2xl overflow-hidden border border-gray-100"></div>
+    </div>
+    {% endif %}
+
+    {% if listing.latitude and listing.longitude %}
+    <script>
+        const map = L.map('map').setView([{{ listing.latitude }}, {{ listing.longitude }}], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        L.marker([{{ listing.latitude }}, {{ listing.longitude }}])
+            .addTo(map)
+            .bindPopup('<b>{{ listing.title }}</b><br>{{ listing.city }}')
+            .openPopup();
+    </script>
+    {% endif %}
     
     <!-- Bouton signaler -->
     {% if request.user.is_authenticated and request.user != listing.user %}
