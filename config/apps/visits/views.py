@@ -12,7 +12,7 @@ def request_visit(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
     
     if listing.user == request.user:
-        return redirect('listing_detail', pk=pk)
+        return redirect('listing_detail', id=pk)
     
     if request.method == 'POST':
         form = VisitForm(request.POST)
@@ -22,7 +22,7 @@ def request_visit(request, pk):
             visit.sender = request.user
             visit.receiver = listing.user
             visit.save()
-            return redirect('listing-detail', id=pk)
+            return redirect('listing_detail', id=pk)
     else:
         form = VisitForm()
     

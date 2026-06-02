@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
 from .models import Listing,Favorite
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 from .forms import ListingForm
 from django.contrib.auth.decorators import login_required
@@ -180,3 +180,16 @@ def listings_favorite(request):
         'listings': listings
         }
     return render(request,'dashboard/favorite.html',context=context)
+
+def city_autocomplete(request):
+    q = request.GET.get('q', '')
+    if len(q) < 2:
+        return JsonResponse([], safe=False)
+    
+    cities = Listing.objects.filter(
+        city__icontains=q,
+        is_available=True,
+        is_approved=True
+    ).values_list('city', flat=True).distinct()[:8]
+    
+    return JsonResponse(list(cities), safe=False)
