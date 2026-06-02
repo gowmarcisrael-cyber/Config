@@ -26,8 +26,9 @@ urlpatterns = [
     path('accounts/',include('apps.accounts.urls')),
     path('',include('apps.visits.urls')),
     path('about/',TemplateView.as_view(template_name='page/about.html'),name='about'),
-    path('Contact/',TemplateView.as_view(template_name='page/contact.html'),name='contact'),
-    path('', include('apps.reports.urls')),
+    # path('contact/',TemplateView.as_view(template_name='page/contact.html'),name='contact'),
+    path('contact/', include('apps.contacts.urls')),
+    path('reports/', include('apps.reports.urls')),
 ] + static(
     settings.MEDIA_URL,
     document_root = settings.MEDIA_ROOT

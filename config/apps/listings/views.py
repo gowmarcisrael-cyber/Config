@@ -114,7 +114,7 @@ def dashboard(request):
 @login_required
 @require_POST
 def listing_delete(request,pk):
-    listing = get_object_or_404(Listing,pk=pk)
+    listing = get_object_or_404(Listing,pk=pk,user=request.user)
     listing.delete()
     return HttpResponse('')
 

@@ -69,37 +69,45 @@
         </div>
 
         <!-- Formulaire placeholder -->
-        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-            <h3 class="font-bold text-slate-800 mb-6">Envoyez-nous un message</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Nom complet</label>
-                    <input type="text" disabled placeholder="Votre nom"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                    <input type="email" disabled placeholder="votre@email.com"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Sujet</label>
-                    <input type="text" disabled placeholder="Objet de votre message"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Message</label>
-                    <textarea disabled rows="4" placeholder="Votre message..."
-                              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white opacity-60 cursor-not-allowed resize-none"></textarea>
-                </div>
-                <button disabled
-                        class="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl text-sm opacity-50 cursor-not-allowed">
-                    Envoyer le message
-                </button>
-                <p class="text-center text-xs text-gray-400">Formulaire disponible prochainement</p>
-            </div>
+        {% if messages %}
+        {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-50 text-red-600{% else %}bg-green-50 text-green-700{% endif %} text-sm rounded-xl px-4 py-3 mb-4">
+            {{ message }}
         </div>
+        {% endfor %}
+        {% endif %}
 
+        <form method="post"  class="space-y-4">
+            {% csrf_token %}
+            
+            <!-- Honeypot -->
+            <input type="text" name="q" style="display:none" tabindex="-1" autocomplete="off">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Nom complet <span class="text-red-400">*</span></label>
+                <input type="text" name="name" placeholder="Votre nom"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Email <span class="text-red-400">*</span></label>
+                <input type="email" name="email" placeholder="votre@email.com"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Sujet</label>
+                <input type="text" name="subject" placeholder="Objet de votre message"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Message <span class="text-red-400">*</span></label>
+                <textarea name="message" rows="4" placeholder="Votre message..."
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"></textarea>
+            </div>
+            <button type="submit"
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                Envoyer le message
+            </button>
+        </form>
     </div>
 </div>
 
