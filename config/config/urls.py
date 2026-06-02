@@ -29,6 +29,7 @@ urlpatterns = [
     # path('contact/',TemplateView.as_view(template_name='page/contact.html'),name='contact'),
     path('contact/', include('apps.contacts.urls')),
     path('reports/', include('apps.reports.urls')),
+    path('staff/',include('apps.staff.urls')),
 ] + static(
     settings.MEDIA_URL,
     document_root = settings.MEDIA_ROOT
