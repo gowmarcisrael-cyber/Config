@@ -11,4 +11,5 @@ urlpatterns = [
     path('reports/', views.staff_reports, name='staff_reports'),
     path('reports/<int:pk>/resolve/', views.resolve_report, name='resolve_report'),
     path('messages/',views.staff_message,name='staff_message'),
+    path('messages/toggle-read/<int:pk>',views.toggle_message_read,name='read-msg')
 ]

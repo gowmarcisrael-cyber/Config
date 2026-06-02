@@ -159,8 +159,18 @@ def resolve_report(request, pk):
 @staff_member_required
 def staff_message(request):
     page = request.GET.get('page')
-    messages = Paginator(Message.objects.order_by('-date'),8).get_page(page)
+    messages = Paginator(Message.objects.order_by('-is_read'),8).get_page(page)
     context = {
         'contact_msgs':messages
     }
     return render(request,'staff/messages.html',context=context)
+
+@require_POST
+def toggle_message_read(request,pk):
+    msg = get_object_or_404(Message,pk=pk)
+    msg.is_read = not msg.is_read
+    msg.save()
+    context = {
+        'msg':msg
+    }
+    return render(request,'staff/partials/read_btn.html',context=context)
