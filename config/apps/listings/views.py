@@ -193,3 +193,19 @@ def city_autocomplete(request):
     ).values_list('city', flat=True).distinct()[:8]
     
     return JsonResponse(list(cities), safe=False)
+
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+
+def map_view(request):
+    listings = Listing.objects.filter(
+        is_available=True,
+        is_approved=True,
+        latitude__isnull=False,
+        longitude__isnull=False
+    ).values('pk', 'title', 'city', 'price', 'property_type', 'status', 'latitude', 'longitude')[:500]
+    
+    context = {
+    'listings_json': json.dumps(list(listings), cls=DjangoJSONEncoder)
+    }
+    return render(request, 'listings/map.html', context)

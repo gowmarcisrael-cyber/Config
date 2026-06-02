@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Carte — HAVEN{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+{% endblock %}
+{% block extra_scripts %}
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="relative" style="height: calc(100vh - 60px);">
+
+    <!-- Carte plein écran -->
+    <div id="map" class="absolute inset-0"></div>
+
+    <!-- Bouton toggle sidebar mobile -->
+    <button id="toggle-sidebar"
+            class="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-50 bg-orange-500 text-white font-semibold px-6 py-3 rounded-full shadow-lg text-sm">
+        📋 Voir la liste
+    </button>
+
+    <!-- Sidebar -->
+    <div id="sidebar"
+         class="absolute inset-y-0 left-0 z-40 w-full md:w-80 bg-white border-r border-gray-100 flex flex-col
+                translate-x-[-100%] md:translate-x-0 transition-transform duration-300">
+        <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h2 class="font-bold text-slate-800 mb-1">Carte des biens</h2>
+                <p class="text-xs text-gray-400" id="listing-count">Chargement...</p>
+            </div>
+            <button id="close-sidebar" class="md:hidden text-gray-400 hover:text-gray-600 text-xl">✕</button>
+        </div>
+        <div id="sidebar-listings" class="overflow-y-auto flex-1 p-3 space-y-3"></div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const listingsData = JSON.parse('{{ listings_json|escapejs }}');
+
+    const map = L.map('map').setView([12.3714, -1.5197], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    const cluster = L.markerClusterGroup();
+    const sidebar = document.getElementById('sidebar-listings');
+    document.getElementById('listing-count').textContent = `${listingsData.length} bien(s) sur la carte`;
+
+    const orangeIcon = L.divIcon({
+        className: '',
+        html: `<div style="background:#f97316;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+
+    listingsData.forEach(listing => {
+        const marker = L.marker([listing.latitude, listing.longitude], { icon: orangeIcon })
+            .bindPopup(`
+                <div style="min-width:200px">
+                    <p style="font-weight:600;color:#1e293b;margin:0 0 4px">${listing.title}</p>
+                    <p style="font-size:12px;color:#94a3b8;margin:0 0 6px">📍 ${listing.city}</p>
+                    <p style="font-weight:700;color:#f97316;margin:0 0 8px">${parseInt(listing.price).toLocaleString()} FCFA</p>
+                    <a href="/detail/${listing.pk}/" 
+                       style="background:#f97316;color:white;padding:4px 12px;border-radius:8px;font-size:12px;text-decoration:none;font-weight:500;">
+                        Voir l'annonce →
+                    </a>
+                </div>
+            `);
+
+        cluster.addLayer(marker);
+
+        const card = document.createElement('a');
+        card.href = `/listings/${listing.pk}/`;
+        card.className = 'block bg-gray-50 rounded-xl p-3 hover:bg-orange-50 transition-colors cursor-pointer border border-transparent hover:border-orange-200';
+        card.innerHTML = `
+            <p class="font-semibold text-slate-800 text-sm truncate">${listing.title}</p>
+            <p class="text-xs text-gray-400 mt-0.5">📍 ${listing.city}</p>
+            <div class="flex items-center justify-between mt-2">
+                <p class="text-orange-500 font-bold text-sm">${parseInt(listing.price).toLocaleString()} FCFA</p>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">${listing.property_type}</span>
+            </div>
+        `;
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
+            map.setView([listing.latitude, listing.longitude], 15);
+            marker.openPopup();
+        });
+        sidebar.appendChild(card);
+    });
+
+    map.addLayer(cluster);
+
+    if (listingsData.length > 0) {
+        map.fitBounds(cluster.getBounds().pad(0.1));
+    }
+});
+// side bar
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggle-sidebar');
+const closeBtn = document.getElementById('close-sidebar');
+
+toggleBtn.addEventListener('click', () => {
+    sidebar.classList.remove('translate-x-[-100%]');
+    toggleBtn.classList.add('hidden');
+});
+
+closeBtn.addEventListener('click', () => {
+    sidebar.classList.add('translate-x-[-100%]');
+    toggleBtn.classList.remove('hidden');
+});
+</script>
+{% endblock %}
+

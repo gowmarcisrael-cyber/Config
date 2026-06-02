@@ -1,0 +1,8 @@
+<button hx-post="{% url 'resolve_report' report.pk %}"
+        hx-target="this"
+        hx-swap="outerHTML"
+        class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors
+            {% if report.is_resolved %}bg-green-100 text-green-700 hover:bg-yellow-50 hover:text-yellow-600
+            {% else %}bg-yellow-50 text-yellow-600 hover:bg-green-100 hover:text-green-700{% endif %}">
+    {% if report.is_resolved %}✅ Résolu{% else %}⏳ En attente{% endif %}
+</button>

@@ -28,6 +28,7 @@
             <a href="{% url 'search' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'search' %}text-orange-500{% endif %}">Annonces</a>
             <a href="{% url 'about' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'about' %}text-orange-500{% endif %}">À propos</a>
             <a href="{% url 'contact' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'contact' %}text-orange-500{% endif %}">Contact</a>
+            <a href="{% url 'map' %}" class="hover:text-orange-500">Carte</a>
         </div>
 
         <!-- Auth desktop -->
