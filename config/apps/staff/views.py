@@ -45,8 +45,8 @@ def staff_listings(request):
 
 @staff_member_required
 @require_POST
-def staff_approve_listing(request, pk):
-    listing = get_object_or_404(Listing,pk=pk)
+def staff_approve_listing(request, slug):
+    listing = get_object_or_404(Listing,slug=slug)
     listing.is_approved = not listing.is_approved
     listing.save()
     context = {

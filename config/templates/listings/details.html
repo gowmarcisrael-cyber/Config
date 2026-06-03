@@ -208,7 +208,7 @@
         <h2 class="text-lg font-semibold text-slate-800 mb-5">Annonces similaires</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             {% for item in similars %}
-            <a href="{% url 'listing_detail' item.pk %}" class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 block">
+            <a href="{% url 'listing_detail' item.slug %}" class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 block">
                 <div class="h-40 bg-gray-100 relative">
                     {% if item.get_first_image %}
                         <img src="{{ item.get_first_image }}" alt="{{ item.title }}" class="w-full h-full object-cover">

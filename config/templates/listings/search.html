@@ -68,7 +68,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for listing in listings %}
-        <a href="{% url 'listing_detail' listing.pk %}"
+        <a href="{% url 'listing_detail' listing.slug %}"
             class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 block">
             <div
                 class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200">

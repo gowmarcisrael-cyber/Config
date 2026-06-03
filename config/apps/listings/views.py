@@ -60,8 +60,8 @@ def search(request):
     }
     return render(request, 'listings/search.html', context=context)
 
-def detail(request,id):
-    listing = get_object_or_404(Listing,id=id)
+def detail(request,slug):
+    listing = get_object_or_404(Listing,slug=slug)
     images = listing.images.all()
     similars = Listing.objects.filter(
         property_type=listing.property_type,
@@ -113,15 +113,15 @@ def dashboard(request):
 
 @login_required
 @require_POST
-def listing_delete(request,pk):
-    listing = get_object_or_404(Listing,pk=pk,user=request.user)
+def listing_delete(request,slug):
+    listing = get_object_or_404(Listing,slug=slug,user=request.user)
     listing.delete()
     return HttpResponse('')
 
 @login_required
 @require_POST
-def listing_change_status(request, pk):
-    listing = get_object_or_404(Listing, pk=pk, user=request.user)
+def listing_change_status(request, slug):
+    listing = get_object_or_404(Listing, slug=slug, user=request.user)
     new_status = request.POST.get('status')
     if new_status in dict(Listing.STATUS):
         listing.status = new_status
@@ -130,8 +130,8 @@ def listing_change_status(request, pk):
 
 @login_required
 @require_http_methods(['GET', 'POST'])
-def listing_edit(request, pk):
-    listing = get_object_or_404(Listing, pk=pk, user=request.user)
+def listing_edit(request, slug):
+    listing = get_object_or_404(Listing, slug=slug, user=request.user)
     if request.method == 'POST':
         form = ListingForm(request.POST, instance=listing)
         if form.is_valid():
@@ -143,8 +143,8 @@ def listing_edit(request, pk):
 
 @login_required
 @require_POST
-def toggle_favorite(request, pk):
-    listing = get_object_or_404(Listing, pk=pk)
+def toggle_favorite(request, slug):
+    listing = get_object_or_404(Listing, slug=slug)
 
     favorite = Favorite.objects.filter(
         user=request.user,
@@ -190,7 +190,7 @@ def city_autocomplete(request):
         city__icontains=q,
         is_available=True,
         is_approved=True
-    ).values_list('city', flat=True).distinct()[:8]
+    ).values_list('city', flat=True).distinct()[:4]
     
     return JsonResponse(list(cities), safe=False)
 
@@ -203,7 +203,7 @@ def map_view(request):
         is_approved=True,
         latitude__isnull=False,
         longitude__isnull=False
-    ).values('pk', 'title', 'city', 'price', 'property_type', 'status', 'latitude', 'longitude')[:500]
+    ).values('title','city', 'price', 'property_type', 'status', 'latitude', 'longitude','slug')[:500]
     
     context = {
     'listings_json': json.dumps(list(listings), cls=DjangoJSONEncoder)

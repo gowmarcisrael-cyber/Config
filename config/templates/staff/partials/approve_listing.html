@@ -1,4 +1,4 @@
-<button hx-post="{% url 'staff_approve_listing' listing.pk %}"
+<button hx-post="{% url 'staff_approve_listing' listing.slug %}"
         hx-target="this"
         hx-swap="outerHTML"
         class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors

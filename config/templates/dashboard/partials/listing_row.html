@@ -28,7 +28,7 @@
     <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-50">
         <!-- Changer statut -->
         <select name="status"
-                hx-post="{% url 'listing_change_status' listing.pk %}"
+                hx-post="{% url 'listing_change_status' listing.slug %}"
                 hx-target="#listing-{{ listing.pk }} .status-badge"
                 hx-swap="outerHTML"
                 hx-include="this"
@@ -39,11 +39,15 @@
         </select>
 
         <div class="flex gap-2 ml-auto">
-            <a href="{% url 'listing_edit' listing.pk %}"
+            <a href="{% url 'listing_detail' listing.slug %}" 
+            class="border border-orange-400 text-orange-500 hover:bg-orange-500 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
+                Voir
+            </a>
+            <a href="{% url 'listing_edit' listing.slug %}"
                class="border border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-500 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors">
                 Modifier
             </a>
-            <button hx-post="{% url 'listing_delete' listing.pk %}"
+            <button hx-post="{% url 'listing_delete' listing.slug %}"
                     hx-target="#listing-{{ listing.pk }}"
                     hx-swap="outerHTML swap:300ms"
                     hx-confirm="Supprimer cette annonce ?"

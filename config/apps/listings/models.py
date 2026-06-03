@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from PIL import Image as PilImage
+from django.utils.text import slugify
+import uuid
 import os
 
 # Create your models here.
@@ -33,6 +35,17 @@ class Listing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     area = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    slug = models.SlugField(max_length=255,unique=True)
+
+    def save(self,*args,**kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            if Listing.objects.filter(slug=slug).exclude(id=self.id).exists():
+                slug = f'{base_slug}-{uuid.uuid4().hex[:6]}'
+            self.slug = slug
+        super().save(*args,**kwargs)
+
     def __str__(self):
         return f'{self.title} - {self.id}'
     
