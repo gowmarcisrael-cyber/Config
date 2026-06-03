@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — HAVEN{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-slate-800">Notifications</h1>
+        <a href="{% url 'dashboard' %}" class="text-sm text-orange-500 hover:underline">← Tableau de bord</a>
+    </div>
+
+    <div class="space-y-3">
+        {% for notification in notifications %}
+        <div class="bg-white border rounded-2xl p-4 flex items-start gap-4
+                    {% if not notification.is_read %}border-orange-200 bg-orange-50{% else %}border-gray-100{% endif %}">
+            <div class="text-2xl flex-shrink-0">
+                {% if notification.type == 'visit_accepted' %}✅
+                {% elif notification.type == 'visit_refused' %}❌
+                {% elif notification.type == 'visit_cancelled' %}🚫
+                {% elif notification.type == 'listing_approved' %}🏠
+                {% else %}📬{% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-700">{{ notification.message }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ notification.created_at|timesince }} ago</p>
+            </div>
+            {% if notification.link %}
+            <form method="post" action="{% url 'mark_read' notification.pk %}" class="flex-shrink-0">
+                {% csrf_token %}
+                <button type="submit" class="text-xs text-orange-500 font-medium hover:underline whitespace-nowrap">
+                    Voir →
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="text-center py-16 text-gray-400">
+            <p class="text-4xl mb-3">🔔</p>
+            <p class="text-sm">Aucune notification.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -30,6 +30,7 @@ urlpatterns = [
     path('contact/', include('apps.contacts.urls')),
     path('reports/', include('apps.reports.urls')),
     path('staff/',include('apps.staff.urls')),
+    path('notifications/',include('apps.notifications.urls')),
 ] + static(
     settings.MEDIA_URL,
     document_root = settings.MEDIA_ROOT

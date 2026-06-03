@@ -5,14 +5,15 @@ from django.views.decorators.http import require_POST
 from .models import Visit
 from apps.listings.models import Listing
 from .forms import VisitForm
+from apps.notifications.views import notify
 
 # Create your views here.
 @login_required
-def request_visit(request, pk):
-    listing = get_object_or_404(Listing, pk=pk)
+def request_visit(request, slug):
+    listing = get_object_or_404(Listing, slug=slug)
     
     if listing.user == request.user:
-        return redirect('listing_detail', id=pk)
+        return redirect('listing_detail', slug=slug)
     
     if request.method == 'POST':
         form = VisitForm(request.POST)
@@ -22,7 +23,7 @@ def request_visit(request, pk):
             visit.sender = request.user
             visit.receiver = listing.user
             visit.save()
-            return redirect('listing_detail', id=pk)
+            return redirect('listing_detail', slug=slug)
     else:
         form = VisitForm()
     
@@ -51,22 +52,44 @@ def update_visit_status(request, pk):
     if new_status in dict(Visit.STATUS):
         visit.status = new_status
         visit.save()
+
+        # Notifier l'envoyeur
+        if new_status == 'Acceptée':
+            notify(
+                user=visit.sender,
+                type='visit_accepted',
+                message=f'Votre demande de visite pour "{visit.listing.title}" a été acceptée.',
+                link=f'/listings/{visit.listing.slug}/'
+            )
+        elif new_status == 'Refusée':
+            notify(
+                user=visit.sender,
+                type='visit_refused',
+                message=f'Votre demande de visite pour "{visit.listing.title}" a été refusée.',
+                link=f'/listings/{visit.listing.slug}/'
+            )
+
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})
 
 @login_required
 @require_POST
 def cancel_visit(request, pk):
     visit = get_object_or_404(Visit, pk=pk)
-    
-    # Vérifier que c'est bien l'envoyeur ou le receveur
     if request.user != visit.sender and request.user != visit.receiver:
         return HttpResponse(status=403)
-    
-    # Ne peut pas annuler une visite déjà annulée ou refusée
     if visit.status in ('Annulée', 'Refusée'):
         return HttpResponse(status=400)
-    
+
     visit.status = 'Annulée'
     visit.save()
-    
+
+    # Notifier l'autre partie
+    other_user = visit.receiver if request.user == visit.sender else visit.sender
+    notify(
+        user=other_user,
+        type='visit_cancelled',
+        message=f'La visite pour "{visit.listing.title}" a été annulée.',
+        link=f'/listings/{visit.listing.slug}/'
+    )
+
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})
