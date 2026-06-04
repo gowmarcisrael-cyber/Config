@@ -37,6 +37,7 @@ class Listing(models.Model):
     is_approved = models.BooleanField(default=False)
     slug = models.SlugField(max_length=255,unique=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_listings', blank=True)
 
     def save(self,*args,**kwargs):
         if not self.slug:
@@ -83,21 +84,3 @@ class Images(models.Model):
 
     def __str__(self):
         return f'({self.listing})-({self.id})'
-
-class Favorite(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='favorites'
-    )
-
-    listing = models.ForeignKey(
-        Listing,
-        on_delete=models.CASCADE,
-        related_name='favorites'
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['user','listing']

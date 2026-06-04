@@ -1,5 +1,4 @@
 from django import template
-from apps.listings.models import Favorite
 
 register = template.Library()
 
@@ -7,4 +6,4 @@ register = template.Library()
 def is_favorited(user, listing):
     if not user.is_authenticated:
         return False
-    return Favorite.objects.filter(user=user, listing=listing).exists()
+    return listing.likes.filter(pk=user.pk).exists()

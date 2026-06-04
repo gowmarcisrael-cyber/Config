@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from .models import Listing,Favorite,Images
+from .models import Listing,Images
 from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 from .forms import ListingForm
@@ -98,7 +98,7 @@ def create_listing(request):
 def get_dashboard_context(user):
     return {
         'listings_count': Listing.objects.filter(user=user).count(),
-        'favorites_count': Favorite.objects.filter(user=user).count(),
+        'favorites_count': Listing.objects.filter(likes=user).count(),
         'visits_received_count': Visit.objects.filter(receiver=user).count(),
         'visits_sent_count': Visit.objects.filter(sender=user).count(),
         'visits_pending_count': Visit.objects.filter(receiver=user, status='En attente').count(),
@@ -172,19 +172,11 @@ def listing_edit(request, slug):
 def toggle_favorite(request, slug):
     listing = get_object_or_404(Listing, slug=slug)
 
-    favorite = Favorite.objects.filter(
-        user=request.user,
-        listing=listing
-    ).first()
-
-    if favorite:
-        favorite.delete()
+    if request.user in listing.likes.all():
+        listing.likes.remove(request.user)
         is_favorite = False
     else:
-        Favorite.objects.create(
-            user=request.user,
-            listing=listing
-        )
+        listing.likes.add(request.user)
         is_favorite = True
 
     return render(
@@ -192,16 +184,14 @@ def toggle_favorite(request, slug):
         "listings/partials/favorite_btn.html",
         {
             "listing": listing,
-            "is_favorite": is_favorite,
+            "is_favorite": is_favorite
         }
     )
 
 @login_required
 def listings_favorite(request):
 
-    listings = Listing.objects.filter(
-        favorites__user=request.user
-    ).distinct()
+    listings = request.user.liked_listings.filter(is_available=True,is_approved=True).order_by('-created_at')
     context = {
         'listings': listings
         }
