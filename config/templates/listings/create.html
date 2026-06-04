@@ -11,7 +11,6 @@
     <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
 
-        <!-- Infos principales -->
         <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
             <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Informations générales</h2>
 
@@ -22,22 +21,24 @@
                 {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Type de bien</label>
                     <select name="property_type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                         {% for value, label in form.fields.property_type.choices %}
                         <option value="{{ value }}" {% if form.property_type.value == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
+                    {% if form.property_type.errors %}<p class="text-xs text-red-500 mt-1">{{ form.property_type.errors.0 }}</p>{% endif %}
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Statut</label>
                     <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
                         {% for value, label in form.fields.status.choices %}
                         <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
+                    {% if form.status.errors %}<p class="text-xs text-red-500 mt-1">{{ form.status.errors.0 }}</p>{% endif %}
                 </div>
             </div>
 
@@ -45,11 +46,10 @@
                 <label class="block text-sm font-medium text-gray-600 mb-1">Description</label>
                 <textarea name="description" rows="4"
                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}<p class="text-xs text-red-500 mt-1">{{ form.description.errors.0 }}</p>{% endif %}
             </div>
         </div>
 
-        <!-- Localisation -->
-        <!-- Localisation -->
         <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
             <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Localisation</h2>
 
@@ -57,6 +57,7 @@
                 <label class="block text-sm font-medium text-gray-600 mb-1">Ville</label>
                 <input type="text" name="city" value="{{ form.city.value|default:'' }}"
                     class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if form.city.errors %}<p class="text-xs text-red-500 mt-1">{{ form.city.errors.0 }}</p>{% endif %}
             </div>
 
             <div>
@@ -64,7 +65,9 @@
                     Positionnez votre bien sur la carte
                     <span class="text-gray-400 font-normal text-xs ml-1">— cliquez pour placer le marqueur</span>
                 </label>
-                <div id="map" class="w-full h-64 rounded-xl border border-gray-200 mb-3">
+                
+                <div id="map" class="z-0 w-full h-64 rounded-xl border border-gray-200 mb-3"></div>
+                
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         const initLat = {{ form.latitude.value|default:'12.3714' }};
@@ -77,6 +80,16 @@
                         }).addTo(map);
 
                         let marker = null;
+
+                        // CORRECTION JS : Fonction déplacée en haut du scope
+                        function updateCoords(e) {
+                            const pos = e.target.getLatLng();
+                            const lat = pos.lat.toFixed(6);
+                            const lng = pos.lng.toFixed(6);
+                            document.getElementById('latitude').value = lat;
+                            document.getElementById('longitude').value = lng;
+                            document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
+                        }
 
                         // Si coordonnées existantes, place le marker
                         {% if form.latitude.value and form.longitude.value %}
@@ -96,65 +109,56 @@
                             updateCoords({ target: marker });
                         });
 
-                        function updateCoords(e) {
-                            const pos = e.target.getLatLng();
-                            const lat = pos.lat.toFixed(6);
-                            const lng = pos.lng.toFixed(6);
-                            document.getElementById('latitude').value = lat;
-                            document.getElementById('longitude').value = lng;
-                            document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
-                        }
                         document.getElementById('geolocate').addEventListener('click', function() {
-                        if (!navigator.geolocation) {
-                            alert('La géolocalisation n\'est pas supportée par votre navigateur.');
-                            return;
-                        }
-
-                        this.textContent = '⏳ Localisation...';
-                        this.disabled = true;
-
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                const lat = position.coords.latitude;
-                                const lng = position.coords.longitude;
-
-                                map.setView([lat, lng], 16);
-
-                                if (marker) {
-                                    marker.setLatLng([lat, lng]);
-                                } else {
-                                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                                    marker.on('dragend', updateCoords);
-                                }
-
-                                document.getElementById('latitude').value = lat.toFixed(6);
-                                document.getElementById('longitude').value = lng.toFixed(6);
-                                document.getElementById('coords-display').textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-
-                                this.textContent = '📍 Me localiser';
-                                this.disabled = false;
-                            },
-                            (error) => {
-                                alert('Impossible de vous localiser. Vérifiez les permissions.');
-                                this.textContent = '📍 Me localiser';
-                                this.disabled = false;
+                            if (!navigator.geolocation) {
+                                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                                return;
                             }
-                        );
+
+                            this.textContent = '⏳ Localisation...';
+                            this.disabled = true;
+
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    const lat = position.coords.latitude;
+                                    const lng = position.coords.longitude;
+
+                                    map.setView([lat, lng], 16);
+
+                                    if (marker) {
+                                        marker.setLatLng([lat, lng]);
+                                    } else {
+                                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                        marker.on('dragend', updateCoords);
+                                    }
+
+                                    document.getElementById('latitude').value = lat.toFixed(6);
+                                    document.getElementById('longitude').value = lng.toFixed(6);
+                                    document.getElementById('coords-display').textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+                                    this.textContent = '📍 Me localiser';
+                                    this.disabled = false;
+                                },
+                                (error) => {
+                                    alert('Impossible de vous localiser. Vérifiez les permissions.');
+                                    this.textContent = '📍 Me localiser';
+                                    this.disabled = false;
+                                }
+                            );
+                        });
                     });
-                });
                 </script>
-                </div>
+                
                 <button type="button" id="geolocate"
                     class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium py-2 px-4 rounded-lg transition-colors">
                     📍 Me localiser
                 </button>
             </div>
 
-            <!-- Champs cachés -->
             <input type="hidden" name="latitude" id="latitude" value="{{ form.latitude.value|default:'' }}">
             <input type="hidden" name="longitude" id="longitude" value="{{ form.longitude.value|default:'' }}">
+            {% if form.latitude.errors %}<p class="text-xs text-red-500 mt-1">La position sur la carte est requise.</p>{% endif %}
 
-            <!-- Coordonnées affichées -->
             <p id="coords-display" class="text-xs text-gray-400">
                 {% if form.latitude.value and form.longitude.value %}
                     📍 {{ form.latitude.value }}, {{ form.longitude.value }}
@@ -164,35 +168,37 @@
             </p>
         </div>
 
-        <!-- Caractéristiques -->
         <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
             <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Caractéristiques</h2>
 
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Prix (FCFA)</label>
                     <input type="number" name="price" value="{{ form.price.value|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.price.errors %}<p class="text-xs text-red-500 mt-1">{{ form.price.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Superficie (m²)</label>
                     <input type="number" name="area" value="{{ form.area.value|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.area.errors %}<p class="text-xs text-red-500 mt-1">{{ form.area.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Chambres</label>
                     <input type="number" name="bedrooms" value="{{ form.bedrooms.value|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.bedrooms.errors %}<p class="text-xs text-red-500 mt-1">{{ form.bedrooms.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Salles de bain</label>
                     <input type="number" name="bathrooms" value="{{ form.bathrooms.value|default:'' }}"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.bathrooms.errors %}<p class="text-xs text-red-500 mt-1">{{ form.bathrooms.errors.0 }}</p>{% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Images -->
         <div class="bg-white border border-gray-100 rounded-2xl p-6">
             <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Photos</h2>
             <label class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-10 cursor-pointer hover:border-orange-400 transition-colors">
@@ -217,16 +223,18 @@
 function previewImages(input) {
     const preview = document.getElementById('preview');
     preview.innerHTML = '';
-    [...input.files].forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'h-20 w-28 object-cover rounded-lg border border-gray-200';
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-    });
+    if (input.files) {
+        [...input.files].forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'h-20 w-28 object-cover rounded-lg border border-gray-200';
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 }
 </script>
 {% endblock %}

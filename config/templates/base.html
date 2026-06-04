@@ -28,7 +28,7 @@
             <a href="{% url 'search' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'search' %}text-orange-500{% endif %}">Annonces</a>
             <a href="{% url 'about' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'about' %}text-orange-500{% endif %}">À propos</a>
             <a href="{% url 'contact' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'contact' %}text-orange-500{% endif %}">Contact</a>
-            <a href="{% url 'map' %}" class="hover:text-orange-500">Carte</a>
+            <a href="{% url 'map' %}" class="hover:text-orange-500 {% if request.resolver_match.url_name == 'map' %}text-orange-500{% endif %}">Carte</a>
         </div>
 
         <!-- Auth desktop -->
@@ -101,6 +101,12 @@
                 <a href="{% url 'dashboard' %}" class="block text-sm font-medium text-gray-600 hover:text-orange-500 mb-2">📊 Tableau de bord</a>
                 <a href="{% url 'profile' %}" class="block text-sm font-medium text-gray-600 hover:text-orange-500 mb-2">👤 Mon profil</a>
                 <a href="{% url 'create-listing' %}" class="block text-sm font-medium text-gray-600 hover:text-orange-500 mb-3">➕ Publier une annonce</a>
+                <a href="{% url 'notifications_list' %}" class="block px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 flex items-center justify-between">
+                🔔 Notifications
+                {% if unread_notifications %}
+                <span class="bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">{{ unread_notifications }}</span>
+                {% endif %}
+                </a>
                 {% if request.user.is_staff %}
                 <a href="{% url 'staff_listings' %}" class="block text-sm font-medium text-gray-600 hover:text-orange-500 mb-2">🛡️ Administration</a>
                 {% endif %}

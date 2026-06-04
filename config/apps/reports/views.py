@@ -12,15 +12,15 @@ User = get_user_model()
 
 @login_required
 @require_POST
-def report_listing(request, pk):
-    listing = get_object_or_404(Listing, pk=pk)
+def report_listing(request, slug):
+    listing = get_object_or_404(Listing, slug=slug)
 
     if listing.user == request.user:
-        return redirect('listing_detail', pk=pk)
+        return redirect('listing_detail', slug=slug)
 
     # Eviter les doublons
     if Report.objects.filter(author=request.user, listing=listing).exists():
-        return redirect('listing_detail', id=pk)
+        return redirect('listing_detail', slug=slug)
 
     reason = request.POST.get('reason')
     message = request.POST.get('message', '')

@@ -35,7 +35,8 @@ class Listing(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     area = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
-    slug = models.SlugField(max_length=255,unique=True)
+    slug = models.SlugField(max_length=255,unique=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self,*args,**kwargs):
         if not self.slug:

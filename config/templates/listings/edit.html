@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Publier une annonce — HAVEN{% endblock %}
+
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-6 py-10">
+
+    <h1 class="text-2xl font-bold text-slate-800 mb-2">Modifier votre annonce</h1>
+    <p class="text-sm text-gray-400 mb-8">Modifiez les informations nécessaires pour votre bien</p>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Informations générales</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Titre</label>
+                <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Type de bien</label>
+                    <select name="property_type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        {% for value, label in form.fields.property_type.choices %}
+                        <option value="{{ value }}" {% if form.property_type.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Statut</label>
+                    <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        {% for value, label in form.fields.status.choices %}
+                        <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Description</label>
+                <textarea name="description" rows="4"
+                          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">{{ form.description.value|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Localisation</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Ville</label>
+                <input type="text" name="city" value="{{ form.city.value|default:'' }}"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-2">Déplacez le marqueur si la position a changé</label>
+                <div id="map" class="z-0 w-full h-64 rounded-xl border border-gray-200 mb-3"></div>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const initLat = {{ form.latitude.value|default:'12.3714' }};
+                        const initLng = {{ form.longitude.value|default:'-1.5197' }};
+
+                        const map = L.map('map').setView([initLat, initLng], 13);
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap'
+                        }).addTo(map);
+
+                        let marker = null;
+
+                        // CORRECTION JS : Fonction déplacée en haut du scope
+                        function updateCoords(e) {
+                            const pos = e.target.getLatLng();
+                            const lat = pos.lat.toFixed(6);
+                            const lng = pos.lng.toFixed(6);
+                            document.getElementById('latitude').value = lat;
+                            document.getElementById('longitude').value = lng;
+                            document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
+                        }
+
+                        // Si coordonnées existantes, place le marker
+                        {% if form.latitude.value and form.longitude.value %}
+                        marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+                        marker.on('dragend', updateCoords);
+                        {% endif %}
+
+                        map.on('click', function(e) {
+                            const { lat, lng } = e.latlng;
+
+                            if (marker) {
+                                marker.setLatLng([lat, lng]);
+                            } else {
+                                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                marker.on('dragend', updateCoords);
+                            }
+                            updateCoords({ target: marker });
+                        });
+
+                        document.getElementById('geolocate').addEventListener('click', function() {
+                            if (!navigator.geolocation) {
+                                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                                return;
+                            }
+
+                            this.textContent = '⏳ Localisation...';
+                            this.disabled = true;
+
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    const lat = position.coords.latitude;
+                                    const lng = position.coords.longitude;
+
+                                    map.setView([lat, lng], 16);
+
+                                    if (marker) {
+                                        marker.setLatLng([lat, lng]);
+                                    } else {
+                                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                        marker.on('dragend', updateCoords);
+                                    }
+
+                                    document.getElementById('latitude').value = lat.toFixed(6);
+                                    document.getElementById('longitude').value = lng.toFixed(6);
+                                    document.getElementById('coords-display').textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+                                    this.textContent = '📍 Me localiser';
+                                    this.disabled = false;
+                                },
+                                (error) => {
+                                    alert('Impossible de vous localiser. Vérifiez les permissions.');
+                                    this.textContent = '📍 Me localiser';
+                                    this.disabled = false;
+                                }
+                            );
+                        });
+                    });
+                </script>
+                
+                <button type="button" id="geolocate"
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                    📍 Me localiser
+                </button>
+            </div>
+
+            <input type="hidden" name="latitude" id="latitude" value="{{ form.latitude.value }}">
+            <input type="hidden" name="longitude" id="longitude" value="{{ form.longitude.value }}">
+            <p id="coords-display" class="text-xs text-gray-400">📍 {{ form.latitude.value }}, {{ form.longitude.value }}</p>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Caractéristiques</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Prix (FCFA)</label>
+                    <input type="number" name="price" value="{{ form.price.value|default:'' }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Superficie (m²)</label>
+                    <input type="number" name="area" value="{{ form.area.value|default:'' }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Chambres</label>
+                    <input type="number" name="bedrooms" value="{{ form.bedrooms.value|default:'' }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Salles de bain</label>
+                    <input type="number" name="bathrooms" value="{{ form.bathrooms.value|default:'' }}" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none">
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Gestion des photos</h2>
+            
+            {% if listing.images.all %}
+            <p class="text-xs text-gray-500 mb-2">Cochez les photos que vous souhaitez supprimer :</p>
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                {% for img in listing.images.all %}
+                <div class="relative group border border-gray-100 rounded-xl overflow-hidden">
+                    <img src="{{ img.image.url }}" class="h-24 w-full object-cover">
+                    <label class="absolute top-2 right-2 bg-white/80 backdrop-blur-xs rounded-md p-1 cursor-pointer flex items-center justify-center border border-gray-200">
+                        <input type="checkbox" name="delete_images" value="{{ img.id }}" class="rounded text-orange-500 focus:ring-orange-400 h-4 w-4">
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <label class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-6 cursor-pointer hover:border-orange-400 transition-colors">
+                <span class="text-2xl mb-1">📷</span>
+                <span class="text-xs font-medium text-gray-600">Ajouter de nouvelles photos</span>
+                <input type="file" name="images" multiple accept="image/*" class="hidden" onchange="previewImages(this)">
+            </label>
+            <div id="preview" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+            Enregistrer les modifications
+        </button>
+
+    </form>
+</div>
+
+<script>
+function previewImages(input) {
+    const preview = document.getElementById('preview');
+    preview.innerHTML = '';
+    if (input.files) {
+        [...input.files].forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'h-16 w-24 object-cover rounded-lg border border-gray-200';
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+</script>
+{% endblock %}

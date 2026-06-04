@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from .models import Listing,Favorite
+from .models import Listing,Favorite,Images
 from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 from .forms import ListingForm
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from apps.visits.models import Visit
@@ -86,7 +87,9 @@ def create_listing(request):
             listing.save()
             for image in images:
                 listing.images.create(image=image)
-            return redirect('listing_detail', id=listing.id)
+            return redirect('listing_detail', slug=listing.slug)
+        else :
+            print('erreur',form.errors)
     else:
         form = ListingForm()
     return render(request, 'listings/create.html', {'form': form})
@@ -132,14 +135,37 @@ def listing_change_status(request, slug):
 @require_http_methods(['GET', 'POST'])
 def listing_edit(request, slug):
     listing = get_object_or_404(Listing, slug=slug, user=request.user)
+    
     if request.method == 'POST':
-        form = ListingForm(request.POST, instance=listing)
+        # On passe l'instance existante pour la mettre à jour au lieu de créer un doublon
+        form = ListingForm(request.POST, request.FILES, instance=listing)
+        images = request.FILES.getlist('images')
+        
+        # Récupérer les IDs des images que l'utilisateur a coché pour suppression
+        images_to_delete = request.POST.getlist('delete_images')
+        
         if form.is_valid():
-            form.save()
-            return redirect('dashboard')
+            # Sauvegarde des modifications textuelles (le slug se mettra à jour si le titre change)
+            listing = form.save()
+            
+            # Gestion des suppressions d'images
+            if images_to_delete:
+                Images.objects.filter(id__in=images_to_delete, listing=listing).delete()
+            
+            # Gestion des nouvelles images ajoutées
+            for image in images:
+                listing.images.create(image=image)
+                
+            messages.success(request, "Votre annonce a été modifiée avec succès.")
+            return redirect('listing_detail', slug=listing.slug)
     else:
+        # En mode GET, on pré-remplit le formulaire avec l'instance
         form = ListingForm(instance=listing)
-    return render(request, 'listings/edit.html', {'form': form, 'listing': listing})
+        
+    return render(request, 'listings/edit.html', {
+        'form': form,
+        'listing': listing, # On passe l'objet pour afficher ses images actuelles dans le HTML
+    })
 
 @login_required
 @require_POST

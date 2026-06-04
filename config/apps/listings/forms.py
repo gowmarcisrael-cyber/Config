@@ -51,7 +51,7 @@ class ListingForm(forms.ModelForm):
     def clean_area(self):
         area = self.cleaned_data['area']
         if area <= 0:
-            raise ValidationError('entrer la "surface correcte')
+            raise ValidationError('entrer la surface correcte')
         return area
         
     def clean_title(self):

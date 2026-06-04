@@ -59,14 +59,14 @@ def update_visit_status(request, pk):
                 user=visit.sender,
                 type='visit_accepted',
                 message=f'Votre demande de visite pour "{visit.listing.title}" a été acceptée.',
-                link=f'/listings/{visit.listing.slug}/'
+                link=f'/detail/{visit.listing.slug}/'
             )
         elif new_status == 'Refusée':
             notify(
                 user=visit.sender,
                 type='visit_refused',
                 message=f'Votre demande de visite pour "{visit.listing.title}" a été refusée.',
-                link=f'/listings/{visit.listing.slug}/'
+                link=f'/detail/{visit.listing.slug}/'
             )
 
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})
@@ -89,7 +89,7 @@ def cancel_visit(request, pk):
         user=other_user,
         type='visit_cancelled',
         message=f'La visite pour "{visit.listing.title}" a été annulée.',
-        link=f'/listings/{visit.listing.slug}/'
+        link=f'/detail/{visit.listing.slug}/'
     )
 
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})

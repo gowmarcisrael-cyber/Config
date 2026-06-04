@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from django.http import HttpResponse,Http404
 from apps.contacts.models import Message
 from apps.listings.models import Listing
 from apps.visits.models import Visit
 from apps.reports.models import Report
+from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
@@ -12,9 +14,15 @@ from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 from django.utils import timezone
 from datetime import timedelta
 # Create your views here.
+"""
+Vue pour les membres du staff pour gérer les annonces, les utilisateurs, les statistiques et les rapports.
+Verifier si l'ulisateur est memebre du staff avant d'afficher les pages ou de permettre les actions.
+Sinon retourner une erreur 404 pour ne pas révéler l'existence de ces pages aux utilisateurs non autorisés.
+"""
 
-@staff_member_required
 def staff_listings(request):
+    if not request.user.is_staff:
+        raise Http404()
     listings = Listing.objects.all().order_by('-created_at')
 
     # Filtres
@@ -43,9 +51,10 @@ def staff_listings(request):
     }
     return render(request, 'staff/listings.html', context=context)
 
-@staff_member_required
 @require_POST
 def staff_approve_listing(request, slug):
+    if not request.user.is_staff:
+        raise Http404()
     listing = get_object_or_404(Listing,slug=slug)
     listing.is_approved = not listing.is_approved
     listing.save()
@@ -57,6 +66,8 @@ def staff_approve_listing(request, slug):
 
 @staff_member_required
 def staff_users(request):
+    if not request.user.is_staff:
+        raise Http404()
     User = get_user_model()
     users = User.objects.exclude(is_staff=True).order_by('-date_joined')
 
@@ -77,9 +88,10 @@ def staff_users(request):
     }
     return render(request, 'staff/users.html', context=context)
 
-@staff_member_required
 @require_POST
 def staff_toggle_user(request, pk):
+    if not request.user.is_staff:
+        raise Http404()
     User = get_object_or_404(get_user_model(), pk=pk)
     User.is_active = not User.is_active
     User.save()
@@ -88,8 +100,9 @@ def staff_toggle_user(request, pk):
     }
     return render(request, 'staff/partials/toggle_user_btn.html', context=context)
 
-@staff_member_required
 def staff_stats(request):
+    if not request.user.is_staff:
+        raise Http404()
     thirty_days_ago = timezone.now() - timedelta(days=30)
 
     listings_count = Listing.objects.count()
@@ -129,8 +142,10 @@ def staff_stats(request):
     }
     return render(request, 'staff/stats.html', context=context)
 
-@staff_member_required
+
 def staff_reports(request):
+    if not request.user.is_staff:
+        raise Http404()
     reports = Report.objects.all().order_by('-created_at').select_related('author', 'listing', 'reported_user')
 
     is_resolved = request.GET.get('is_resolved')
@@ -148,16 +163,18 @@ def staff_reports(request):
     }
     return render(request, 'staff/reports.html', context=context)
 
-@staff_member_required
 @require_POST
 def resolve_report(request, pk):
+    if not request.user.is_staff:
+        raise Http404()
     report = get_object_or_404(Report, pk=pk)
     report.is_resolved = not report.is_resolved
     report.save()
     return render(request, 'staff/partials/report_resolve_btn.html', {'report': report})
 
-@staff_member_required
 def staff_message(request):
+    if not request.user.is_staff:
+        raise Http404()
     page = request.GET.get('page')
     messages = Paginator(Message.objects.order_by('-is_read'),8).get_page(page)
     context = {
@@ -167,6 +184,8 @@ def staff_message(request):
 
 @require_POST
 def toggle_message_read(request,pk):
+    if not request.user.is_staff:
+        raise Http404()
     msg = get_object_or_404(Message,pk=pk)
     msg.is_read = not msg.is_read
     msg.save()
