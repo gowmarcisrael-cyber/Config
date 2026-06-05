@@ -5,9 +5,55 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash,get_user_model
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm, LoginForm
+from django.utils.http import urlsafe_base64_decode,urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes,force_str
+from django.http import HttpResponse
 import bleach
+from django.core.mail import send_mail,EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+import uuid
 # Create your views here.
+User = get_user_model()
 
+def generate_username(email):
+    base = email.split("@")[0]
+    username = base
+    count = 1
+
+    while User.objects.filter(username=username).exists():
+        username = f"{base}{count}"
+        count += 1
+
+    return username
+
+def send_welcome_email(request,user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    activation_link = request.build_absolute_uri(
+        f"/accounts/activate/{uid}/{token}/"
+    )
+    subject = "Bienvenue sur notre plateforme"
+    html_content = render_to_string(
+        "emails/welcome.html",
+        {
+            "user": user,
+            "activation_link": activation_link,
+        }
+    )
+
+    text_content = f"Activez votre compte ici : {activation_link}"
+
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        settings.EMAIL_HOST_USER,
+        [user.email],
+    )
+
+    email.attach_alternative(html_content, "text/html")
+    email.send()
 
 def register(request):
     if request.user.is_authenticated:
@@ -15,12 +61,37 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
+            user = form.save(commit=False)
+            user.email_verified = False
+            user.username = generate_username(user.email)
+            user.save()
+            send_welcome_email(request,user)
+            return render(request,'accounts/created.html')
     else:
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
+
+def activate(request, uid, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uid))
+        user = get_user_model().objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
+        user = None
+
+    if user is None:
+        return HttpResponse(status=404)
+
+    if user.email_verified:
+        return redirect('login')
+
+    if default_token_generator.check_token(user, token):
+        user.email_verified = True
+        user.is_active = True
+        user.save()
+        login(request, user)
+        return render(request, 'accounts/activated.html')
+
+    return HttpResponse(status=404)
 
 
 def login_view(request):
@@ -29,16 +100,25 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            user = authenticate(
-                request,
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password']
-            )
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            
+            # Récupérer l'utilisateur par email
+            User = get_user_model()
+            try:
+                user_obj = User.objects.get(email=email)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
+
             if user:
+                if not user.email_verified:
+                    messages.error(request, 'Veuillez activer votre compte.')
+                    return redirect('login')
                 login(request, user)
                 return redirect(request.GET.get('next', 'home'))
             else:
-                form.add_error(None, 'Identifiants incorrects.')
+                form.add_error(None, 'Email ou mot de passe incorrect.')
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})

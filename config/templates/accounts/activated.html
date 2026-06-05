@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Compte activé — HAVEN{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-6">
+    <div class="bg-white border border-gray-100 rounded-2xl p-10 max-w-md w-full text-center">
+        <div class="text-5xl mb-4">✅</div>
+        <h1 class="text-xl font-bold text-slate-800 mb-2">Compte activé !</h1>
+        <p class="text-sm text-gray-400 mb-6">
+            Votre compte a été activé avec succès. Vous êtes maintenant connecté.
+        </p>
+        <a href="{% url 'home' %}"
+           class="inline-block bg-orange-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-orange-600 transition-colors">
+            Découvrir les annonces
+        </a>
+    </div>
+</div>
+{% endblock %}

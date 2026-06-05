@@ -103,3 +103,37 @@ def cancel_visit(request, pk):
     )
 
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})
+
+from django.core.mail import EmailMultiAlternatives
+
+def test_email(request):
+
+    subject = "Bienvenue sur notre plateforme 🏠"
+
+    text_content = "Bienvenue sur notre site immobilier"
+
+    html_content = """
+    <h1>Bienvenue 👋</h1>
+    <p>Ton compte a été créé avec succès.</p>
+    <a href="https://example.com" style="
+        padding:10px 15px;
+        background:#3b82f6;
+        color:white;
+        text-decoration:none;
+        border-radius:5px;
+    ">
+        Activer mon compte
+    </a>
+    """
+
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        "gowmarcisrael@gmail.com",
+        ["gowmarcisrael9@gmail.com"]
+    )
+
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+    return HttpResponse("Email HTML envoyé !")
