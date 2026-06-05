@@ -5,12 +5,13 @@ from django.views.decorators.http import require_POST
 from .models import Visit
 from apps.listings.models import Listing
 from .forms import VisitForm
+from django.contrib import messages
 from apps.notifications.views import notify
 
 # Create your views here.
 @login_required
 def request_visit(request, slug):
-    listing = get_object_or_404(Listing, slug=slug)
+    listing = get_object_or_404(Listing.objects.select_related('user'), slug=slug)
     
     if listing.user == request.user:
         return redirect('listing_detail', slug=slug)
@@ -18,6 +19,15 @@ def request_visit(request, slug):
     if request.method == 'POST':
         form = VisitForm(request.POST)
         if form.is_valid():
+            already_requested = Visit.objects.filter(
+                listing=listing,
+                sender=request.user,
+                status='En attente' # Ajuste selon tes statuts réels
+            ).exists()
+            if already_requested:
+                error_msg = "Vous avez déjà une demande de visite en attente pour ce bien."
+                messages.error(request,error_msg)
+                return render(request,'visits/error.html')
             visit = form.save(commit=False)
             visit.listing = listing
             visit.sender = request.user

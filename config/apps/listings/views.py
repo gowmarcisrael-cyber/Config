@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render, redirect,get_object_or_404
 from .models import Listing,Images
 from django.http import HttpResponse, JsonResponse
@@ -11,12 +13,21 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Count, Q
 from apps.reports.models import Report
 from django.contrib.postgres.search import SearchQuery,SearchVector,SearchRank
 # Create your views here.
 
 def home(request):
-    listings = Listing.objects.filter(is_available=True,is_approved=True)[:6]
+    listings = Listing.objects.filter(
+        is_available=True,
+        is_approved=True).select_related(
+            'user'
+            ).prefetch_related(
+            'images',
+            'likes').only(
+            'id', 'title', 'price', 'city', 'property_type', 'status', 'slug', 'user__id', 'user__username'
+            )[:6]
     context = {
         'listings':listings,
         'types':Listing.TYPES,
@@ -25,7 +36,10 @@ def home(request):
     return render(request,'listings/index.html',context=context)
 
 def search(request):
-    listings = Listing.objects.filter(is_available=True,is_approved=True)
+    listings = Listing.objects.filter(
+        is_available=True,
+        is_approved=True
+    ).select_related('user').prefetch_related('likes','images')
 
     status = request.GET.get('status')
     city = request.GET.get('city')
@@ -40,41 +54,55 @@ def search(request):
     if property_type:
         listings = listings.filter(property_type=property_type)
     if price_max:
-        listings = listings.filter(price__lte=price_max)
+        try:
+            listings = listings.filter(price__lte=int(price_max))
+        except ValueError:
+            pass
 
     if query:
-        search_vector = SearchVector('title', weight='A') + SearchVector('description', weight='B') + SearchVector('city', weight='C')
+        search_vector = (
+            SearchVector('title', weight='A') +
+            SearchVector('description', weight='B') +
+            SearchVector('city', weight='C')
+        )
         search_query = SearchQuery(query)
         listings = listings.annotate(
             rank=SearchRank(search_vector, search_query)
-        ).filter(rank__gte=0).order_by('-rank')
-
+        ).filter(rank__gt=0).order_by('-rank')
+    else:
+        listings = listings.order_by('-created_at')
 
     page = request.GET.get('page')
     listings = Paginator(listings, 6).get_page(page)
-    
+
     context = {
         'listings': listings,
         'types': Listing.TYPES,
         'statuses': Listing.STATUS[:2],
         'filters': request.GET,
     }
-    return render(request, 'listings/search.html', context=context)
+    return render(request, 'listings/search.html', context)
 
-def detail(request,slug):
-    listing = get_object_or_404(Listing,slug=slug)
+def detail(request, slug):
+    listing = get_object_or_404(
+        Listing.objects.select_related('user').prefetch_related('likes','images'),
+        slug=slug
+    )
     images = listing.images.all()
     similars = Listing.objects.filter(
         property_type=listing.property_type,
-        city=listing.city
-    ).exclude(id=listing.id)[:4]
+        city=listing.city,
+        is_available=True,
+        is_approved=True,
+        ).exclude(slug=listing.slug).select_related('user').prefetch_related('likes','images')[:4]
+
     context = {
         'listing': listing,
         'images': images,
         'similars': similars,
         'report_reasons': Report.REASONS,
     }
-    return render(request, 'listings/details.html', context=context)
+    return render(request, 'listings/details.html', context)
 
 @login_required
 def create_listing(request):
@@ -96,17 +124,34 @@ def create_listing(request):
 
 # listings/views.py
 def get_dashboard_context(user):
+    visit_stats = Visit.objects.aggregate(
+        received=Count('id', filter=Q(receiver=user)),
+        sent=Count('id', filter=Q(sender=user)),
+        pending=Count('id', filter=Q(receiver=user, status='En attente'))
+    )
+    
     return {
         'listings_count': Listing.objects.filter(user=user).count(),
         'favorites_count': Listing.objects.filter(likes=user).count(),
-        'visits_received_count': Visit.objects.filter(receiver=user).count(),
-        'visits_sent_count': Visit.objects.filter(sender=user).count(),
-        'visits_pending_count': Visit.objects.filter(receiver=user, status='En attente').count(),
+        
+        # On extrait les données calculées en une seule fois
+        'visits_received_count': visit_stats['received'],
+        'visits_sent_count': visit_stats['sent'],
+        'visits_pending_count': visit_stats['pending'],
     }
 
 @login_required
 def dashboard(request):
-    listings = Listing.objects.filter(user=request.user).order_by('-created_at')
+    listings = Listing.objects.filter(user=request.user).order_by(
+        '-created_at'
+        ).prefetch_related('images').only(
+            'id', 
+            'title', 
+            'price', 
+            'city', 
+            'property_type', 
+            'status', 
+            'slug',)
     context = {
         **get_dashboard_context(request.user),
         'listings': listings,
@@ -118,6 +163,9 @@ def dashboard(request):
 @require_POST
 def listing_delete(request,slug):
     listing = get_object_or_404(Listing,slug=slug,user=request.user)
+    for img in listing.images.all():
+        if img.image and os.path.isfile(img.image.path):
+            os.remove(img.image.path)
     listing.delete()
     return HttpResponse('')
 
@@ -128,7 +176,11 @@ def listing_change_status(request, slug):
     new_status = request.POST.get('status')
     if new_status in dict(Listing.STATUS):
         listing.status = new_status
-        listing.save()
+        if new_status in ['Vendu', 'Loué']: # Ajuste selon tes valeurs réelles
+            listing.is_available = False
+        else:
+            listing.is_available = True
+        listing.save(update_fields=['status','is_available','updated_at'])
     return render(request, 'dashboard/partials/status_badge.html', {'listing': listing})
 
 @login_required
@@ -191,7 +243,17 @@ def toggle_favorite(request, slug):
 @login_required
 def listings_favorite(request):
 
-    listings = request.user.liked_listings.filter(is_available=True,is_approved=True).order_by('-created_at')
+    listings = request.user.liked_listings.filter(is_available=True,is_approved=True).prefetch_related('likes','images').order_by('-created_at').only(
+        'id',
+        'title',
+        'city',
+        'area',
+        'bathrooms',
+        'bedrooms',
+        'status',
+        'property_type',
+        'slug'
+    )
     context = {
         'listings': listings
         }
@@ -206,7 +268,7 @@ def city_autocomplete(request):
         city__icontains=q,
         is_available=True,
         is_approved=True
-    ).values_list('city', flat=True).distinct()[:4]
+    ).only('city').values_list('city', flat=True).distinct()[:4]
     
     return JsonResponse(list(cities), safe=False)
 

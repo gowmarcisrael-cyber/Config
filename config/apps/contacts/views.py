@@ -11,6 +11,7 @@ def contact(request):
     if request.method == 'POST':
         # Honeypot - si rempli c'est un bot
         if request.POST.get('q'):
+            messages.success(request, 'Votre message a bien été envoyé.')
             return redirect('contact')
 
         name = bleach.clean(request.POST.get('name', ''), tags=[], strip=True)
