@@ -1,5 +1,4 @@
 import os
-
 from django.shortcuts import render, redirect,get_object_or_404
 from .models import Listing,Images
 from django.http import HttpResponse, JsonResponse

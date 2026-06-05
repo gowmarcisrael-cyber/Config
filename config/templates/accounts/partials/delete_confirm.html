@@ -1,0 +1,19 @@
+<div id="delete-section" class="bg-red-50 border border-red-100 rounded-2xl p-5">
+    <p class="text-sm font-semibold text-red-600 mb-1">Confirmer la suppression</p>
+    <p class="text-xs text-gray-500 mb-4">Un email de confirmation vous sera envoyé. Cette action est irréversible.</p>
+    <div class="flex gap-3">
+        <form method="post" action="{% url 'delete_account' %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                Oui, envoyer l'email de confirmation
+            </button>
+        </form>
+        <button hx-get="{% url 'delete_cancel' %}"
+                hx-target="#delete-section"
+                hx-swap="outerHTML"
+                class="border border-gray-200 text-gray-500 text-xs font-semibold px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            Annuler
+        </button>
+    </div>
+</div>

@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render,redirect
 from .forms import RegisterForm, LoginForm
 from django.shortcuts import render, redirect
@@ -12,6 +14,7 @@ from django.http import HttpResponse
 import bleach
 from django.core.mail import send_mail,EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
 from django.conf import settings
 import uuid
 # Create your views here.
@@ -188,12 +191,68 @@ def profile(request):
 
     return render(request, 'accounts/profile/profile.html', {'user': request.user})
 
-def edit_profile(request):
-    return render(request,'accounts/edit_profile.html')
 
-def change_password(request):
-    return render(request,'accounts/change_password.html')
-
+@login_required
 def delete_account(request):
-    return render(request,'accounts/delete_account.html')
+    send_delete_confirmation_email(request, request.user)
+    return render(request, 'accounts/delete_account.html')
 
+@login_required
+def delete_confirm(request):
+    return render(request, 'accounts/partials/delete_confirm.html')
+
+@login_required
+def delete_cancel(request):
+    return render(request, 'accounts/partials/delete_btn.html')
+
+@login_required
+@require_POST
+def delete_account(request):
+    send_delete_confirmation_email(request, request.user)
+    return render(request, 'accounts/partials/delete_email_sent.html')
+
+
+def send_delete_confirmation_email(request, user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    delete_link = request.build_absolute_uri(
+        f"/accounts/delete/{uid}/{token}/"
+    )
+    subject = "Confirmer la suppression de votre compte — HAVEN"
+    html_content = render_to_string(
+        "emails/account_delete_confirmation.html",
+        {
+            "user": user,
+            "delete_link": delete_link,
+        }
+    )
+    text_content = f"Confirmer la suppression : {delete_link}"
+
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+    )
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+def delete_account_confirm(request, uid, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uid))
+        user = get_user_model().objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
+        user = None
+
+    if user is None:
+        return HttpResponse(status=404)
+
+    if default_token_generator.check_token(user, token):
+        logout(request)
+        if user.avatar:
+            user.avatar.delete(save=False)
+        user.delete()
+        messages.success(request, 'Votre compte a été supprimé avec succès.')
+        return redirect('home')
+
+    return HttpResponse(status=404)
