@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ listing.title }} — HAVEN{% endblock %}
+{% load l10n %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto px-6 py-10">
@@ -138,13 +139,13 @@
 
     {% if listing.latitude and listing.longitude %}
     <script>
-        const map = L.map('map').setView([{{ listing.latitude }}, {{ listing.longitude }}], 15);
+        const map = L.map('map').setView([{{ listing.latitude|unlocalize }}, {{ listing.longitude|unlocalize }}], 15);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        L.marker([{{ listing.latitude }}, {{ listing.longitude }}])
+        L.marker([{{ listing.latitude|unlocalize }}, {{ listing.longitude|unlocalize }}])
             .addTo(map)
             .bindPopup('<b>{{ listing.title }}</b><br>{{ listing.city }}')
             .openPopup();
