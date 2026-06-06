@@ -13,7 +13,7 @@ User = get_user_model()
 @login_required
 @require_POST
 def report_listing(request, slug):
-    listing = get_object_or_404(Listing, slug=slug)
+    listing = get_object_or_404(Listing.objects.select_related('user'), slug=slug)
 
     if listing.user == request.user:
         return redirect('listing_detail', slug=slug)

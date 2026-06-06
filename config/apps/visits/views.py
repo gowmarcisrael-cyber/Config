@@ -140,14 +140,14 @@ def update_visit_status(request, pk):
         if new_status == 'Acceptée':
             notify(
                 user=visit.sender,
-                type='visit_accepted',
+                notif_type='visit_accepted',
                 message=f'Votre demande de visite pour "{visit.listing.title}" a été acceptée.',
                 link=f'/detail/{visit.listing.slug}/'
             )
         elif new_status == 'Refusée':
             notify(
                 user=visit.sender,
-                type='visit_refused',
+                notif_type='visit_refused',
                 message=f'Votre demande de visite pour "{visit.listing.title}" a été refusée.',
                 link=f'/detail/{visit.listing.slug}/'
             )
@@ -170,7 +170,7 @@ def cancel_visit(request, pk):
     other_user = visit.receiver if request.user == visit.sender else visit.sender
     notify(
         user=other_user,
-        type='visit_cancelled',
+        notif_type='visit_cancelled',
         message=f'La visite pour "{visit.listing.title}" a été annulée.',
         link=f'/detail/{visit.listing.slug}/'
     )

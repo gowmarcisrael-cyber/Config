@@ -5,10 +5,10 @@ from .models import Notification
 # Create your views here.
 
 
-def notify(user, type, message, link=''):
+def notify(user, notif_type, message, link=''):
     Notification.objects.create(
         user=user,
-        type=type,
+        notification_type=notif_type,
         message=message,
         link=link,
     )
