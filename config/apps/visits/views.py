@@ -98,23 +98,43 @@ def request_visit(request, slug):
 
 @login_required
 def visits_sent(request):
-    visits = Visit.objects.filter(sender=request.user).select_related('listing', 'receiver')
+    visits = Visit.objects.filter(
+        sender=request.user).select_related(
+            'listing',
+            'receiver').prefetch_related('listing__images').only(
+            'id',
+            'date', 
+            'status',
+            'message',
+            'listing_id',
+            'receiver_id',)
     return render(request, 'visits/sent.html', {'visits': visits})
 
 
 @login_required
 def visits_received(request):
-    visits = Visit.objects.filter(receiver=request.user).select_related('listing', 'sender')
+    visits = Visit.objects.filter(
+        receiver=request.user).select_related(
+            'listing',
+            'sender').prefetch_related('listing__images').only(
+            'id',
+            'date', 
+            'status',
+            'message',
+            'listing_id',
+            'sender_id',)
     return render(request, 'visits/received.html', {'visits': visits})
 
 @login_required
 @require_POST
 def update_visit_status(request, pk):
-    visit = get_object_or_404(Visit, pk=pk, receiver=request.user)
+    visit = get_object_or_404(Visit.objects.select_related('listing','sender'),
+                              pk=pk, 
+                              receiver=request.user)
     new_status = request.POST.get('status')
     if new_status in dict(Visit.STATUS):
         visit.status = new_status
-        visit.save()
+        visit.save(update_fields=['status'])
 
         # Notifier l'envoyeur
         if new_status == 'Acceptée':
@@ -137,14 +157,14 @@ def update_visit_status(request, pk):
 @login_required
 @require_POST
 def cancel_visit(request, pk):
-    visit = get_object_or_404(Visit, pk=pk)
+    visit = get_object_or_404(Visit.objects.select_related('listing','sender','receiver'), pk=pk)
     if request.user != visit.sender and request.user != visit.receiver:
         return HttpResponse(status=403)
     if visit.status in ('Annulée', 'Refusée'):
         return HttpResponse(status=400)
 
     visit.status = 'Annulée'
-    visit.save()
+    visit.save(update_fields=['status'])
 
     # Notifier l'autre partie
     other_user = visit.receiver if request.user == visit.sender else visit.sender
