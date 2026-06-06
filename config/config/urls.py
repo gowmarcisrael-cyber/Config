@@ -31,6 +31,7 @@ urlpatterns = [
     path('reports/', include('apps.reports.urls')),
     path('staff/',include('apps.staff.urls')),
     path('notifications/',include('apps.notifications.urls')),
+    path('accounts/', include('allauth.urls')),
 ] + static(
     settings.MEDIA_URL,
     document_root = settings.MEDIA_ROOT
