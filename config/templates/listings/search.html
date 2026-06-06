@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load listing_tags %}
+{% load static %}
 {% block title %}HAVEN — Immobilier{% endblock %}
 
 {% block content %}
@@ -68,60 +70,97 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for listing in listings %}
-            <div
-                class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
-                <div class="relative h-44 bg-gray-100">
-                    {% if listing.get_first_image %}
+            <div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full max-w-[300px] mx-auto">
+    
+            <!-- Image -->
+            <div class="relative h-48 bg-gray-100">
+                {% if listing.get_first_image %}
                     <img src="{{ listing.get_first_image }}" alt="{{ listing.title }}"
                         class="w-full h-full object-cover">
-                    {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-4xl">🏠</div>
-                    {% endif %}
-                    <span
-                        class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
-                    {% if listing.status == 'A louer' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-                        {{ listing.status }}
-                    </span>
-                    <span
-                        class="absolute top-2 right-2 bg-white text-xs font-semibold px-2 py-1 rounded-md text-gray-700">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-gray-50 to-gray-100">🏠</div>
+                {% endif %}
+
+                <!-- Badge statut -->
+                <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
+                    {% if listing.status == 'A louer' %}bg-green-100 text-green-800
+                    {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ listing.status }}
+                </span>
+
+                <!-- Bouton favori -->
+                {% if request.user.is_authenticated %}
+                <div class="absolute top-2 right-2">
+                    {% is_favorited request.user listing as is_fav %}
+                    {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Contenu -->
+            <div class="p-4">
+                <!-- Ville + Type -->
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-1 text-xs text-gray-400 font-medium">
+                        <img src="{% static 'images/gps.png' %}" alt="" class="w-3.5 h-3.5">
+                        <span>{{ listing.city }}</span>
+                    </div>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">
                         {{ listing.property_type }}
                     </span>
                 </div>
-                <div class="p-4">
-                    <h3 class="font-semibold text-slate-800 text-sm mb-1 truncate">{{ listing.title }}</h3>
-                    <p class="text-xs text-gray-400 mb-3">📍 {{ listing.city }}</p>
-                    <p class="text-orange-500 font-bold text-base mb-3">{{ listing.price|floatformat:0 }} FCFA</p>
-                    <div class="flex gap-3 text-xs text-gray-500 border-t border-gray-50 pt-3">
-                        {% if listing.bedrooms %}<span>🛏 {{ listing.bedrooms }} ch.</span>{% endif %}
-                        {% if listing.bathrooms %}<span>🚿 {{ listing.bathrooms }} sdb</span>{% endif %}
-                        {% if listing.area %}<span>📐 {{ listing.area }} m²</span>{% endif %}
+
+                <!-- Titre -->
+                <h3 class="font-bold text-slate-800 text-sm mb-1 truncate">{{ listing.title }}</h3>
+
+                <!-- Description -->
+                <p class="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{{ listing.description }}</p>
+
+                <!-- Prix -->
+                <p class="text-orange-500 font-extrabold text-base mb-3">
+                    {{ listing.price|floatformat:0 }}
+                    <span class="text-xs font-medium text-gray-400">FCFA{% if listing.status == 'A louer' %}/mois{% endif %}</span>
+                </p>
+
+                <!-- Caractéristiques + Lien -->
+                <div class="flex items-center justify-between border-t border-gray-50 pt-3">
+                    <div class="flex gap-3 text-xs text-gray-400">
+                        {% if listing.bedrooms %}<span>🛏 {{ listing.bedrooms }}</span>{% endif %}
+                        {% if listing.bathrooms %}<span>🚿 {{ listing.bathrooms }}</span>{% endif %}
+                        {% if listing.area %}<span>📐 {{ listing.area }}m²</span>{% endif %}
                     </div>
-                </div>
-                {% load listing_tags %}
-                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                    {% is_favorited request.user listing as is_fav %}
-                    {% include "listings/partials/favorite_btn.html" with is_favorite=is_fav %}
                     <a href="{% url 'listing_detail' listing.slug %}"
-                    class="text-xs font-semibold text-orange-500 border border-orange-200 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition-colors">
-                        Voir l'annonce →
+                    class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
+                        Voir →
                     </a>
                 </div>
+            </div>
             </div>
         {% empty %}
         <div class="col-span-3 text-center py-16 text-gray-400">Aucune annonce disponible.</div>
         {% endfor %}
     </div>
 
-    <div class="flex justify-between">
+    {% if listings.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
         {% if listings.has_previous %}
-        <a href="?{{ filters.urlencode }}&page={{ listings.previous_page_number}}"
-            class="text-sm text-orange-500 font-medium hover:underline cursor-pointer">&laquo; ← Précédant</a>
+        <a href="?{{ filters.urlencode }}&page={{ listings.previous_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">←</a>
         {% endif %}
+        {% for num in listings.paginator.page_range %}
+        <a href="?{{ filters.urlencode }}&page={{ num }}"
+           class="px-4 py-2 rounded-lg border text-sm
+               {% if listings.number == num %}bg-orange-500 text-white border-orange-500{% else %}border-gray-200 hover:border-orange-400{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
         {% if listings.has_next %}
         <a href="?{{ filters.urlencode }}&page={{ listings.next_page_number }}"
-            class="text-sm text-orange-500 font-medium hover:underline cursor-pointer">Suivant → &raquo;</a>
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">→</a>
         {% endif %}
     </div>
+    {% endif %}
 </div>
 <script>
     const cityInput = document.getElementById('city-input');

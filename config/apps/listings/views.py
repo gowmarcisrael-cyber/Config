@@ -20,7 +20,7 @@ from django.contrib.postgres.search import SearchQuery,SearchVector,SearchRank
 def home(request):
     listings = Listing.objects.filter(
         is_available=True,
-        is_approved=True).select_related(
+        is_approved=True).exclude(status__in=['Vendu','Loué']).select_related(
             'user'
             ).prefetch_related(
             'images',

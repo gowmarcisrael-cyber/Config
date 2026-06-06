@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load listing_tags %}
+{% load static %}
 {% block title %}{{ listing.title }} — HAVEN{% endblock %}
 {% load l10n %}
 
@@ -209,24 +211,73 @@
         <h2 class="text-lg font-semibold text-slate-800 mb-5">Annonces similaires</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             {% for item in similars %}
-            <a href="{% url 'listing_detail' item.slug %}" class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 block">
-                <div class="h-40 bg-gray-100 relative">
-                    {% if item.get_first_image %}
-                        <img src="{{ item.get_first_image }}" alt="{{ item.title }}" class="w-full h-full object-cover">
-                    {% else %}
-                        <div class="w-full h-full flex items-center justify-center text-4xl">🏠</div>
-                    {% endif %}
-                    <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
-                        {% if item.status == 'A louer' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-                        {{ item.status }}
+             <div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full max-w-[300px] mx-auto">
+    
+            <!-- Image -->
+            <div class="relative h-48 bg-gray-100">
+                {% if item.get_first_image %}
+                    <img src="{{ item.get_first_image }}" alt="{{ item.title }}"
+                        class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-gray-50 to-gray-100">🏠</div>
+                {% endif %}
+
+                <!-- Badge statut -->
+                <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
+                    {% if listing.status == 'A louer' %}bg-green-100 text-green-800
+                    {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ item.status }}
+                </span>
+
+                <!-- Bouton favori -->
+                {% if item.user.is_authenticated %}
+                <div class="absolute top-2 right-2">
+                    {% is_favorited request.user item as is_fav %}
+                    {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Contenu -->
+            <div class="p-4">
+                <!-- Ville + Type -->
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-1 text-xs text-gray-400 font-medium">
+                        <img src="{% static 'images/gps.png' %}" alt="" class="w-3.5 h-3.5">
+                        <span>{{ item.city }}</span>
+                    </div>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">
+                        {{ item.property_type }}
                     </span>
                 </div>
-                <div class="p-4">
-                    <h3 class="font-semibold text-slate-800 text-sm mb-1 truncate">{{ item.title }}</h3>
-                    <p class="text-xs text-gray-400 mb-2">📍 {{ item.city }}</p>
-                    <p class="text-orange-500 font-bold text-sm">{{ item.price|floatformat:0 }} FCFA</p>
+
+                <!-- Titre -->
+                <h3 class="font-bold text-slate-800 text-sm mb-1 truncate">{{ listing.title }}</h3>
+
+                <!-- Description -->
+                <p class="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{{ listing.description }}</p>
+
+                <!-- Prix -->
+                <p class="text-orange-500 font-extrabold text-base mb-3">
+                    {{ item.price|floatformat:0 }}
+                    <span class="text-xs font-medium text-gray-400">FCFA{% if listing.status == 'A louer' %}/mois{% endif %}</span>
+                </p>
+
+                <!-- Caractéristiques + Lien -->
+                <div class="flex items-center justify-between border-t border-gray-50 pt-3">
+                    <div class="flex gap-3 text-xs text-gray-400">
+                        {% if item.bedrooms %}<span>🛏 {{ item.bedrooms }}</span>{% endif %}
+                        {% if item.bathrooms %}<span>🚿 {{ item.bathrooms }}</span>{% endif %}
+                        {% if item.area %}<span>📐 {{ item.area }}m²</span>{% endif %}
+                    </div>
+                    <a href="{% url 'listing_detail' item.slug %}"
+                    class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
+                        Voir →
+                    </a>
                 </div>
-            </a>
+            </div>
+            </div>
             {% endfor %}
         </div>
     </div>
