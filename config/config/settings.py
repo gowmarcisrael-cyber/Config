@@ -200,8 +200,3 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {'access_type': 'online'},
     }
 }
-
-from groq import Groq
-
-client = Groq(api_key=config('GROQ_API_KEY'))
-
