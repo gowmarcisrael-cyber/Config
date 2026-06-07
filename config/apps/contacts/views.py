@@ -1,10 +1,8 @@
-from django.shortcuts import render,redirect,get_object_or_404
-from django.views.decorators.http import require_POST
+from django.shortcuts import render,redirect
 from .models import Message
 import bleach
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
 from django.contrib import messages
+from .forms import ContactForm
 
 # Create your views here.
 def contact(request):
@@ -13,27 +11,24 @@ def contact(request):
         if request.POST.get('q'):
             messages.success(request, 'Votre message a bien été envoyé.')
             return redirect('contact')
-
-        name = bleach.clean(request.POST.get('name', ''), tags=[], strip=True)
-        email = bleach.clean(request.POST.get('email', ''), tags=[], strip=True)
-        subject = bleach.clean(request.POST.get('subject', ''), tags=[], strip=True)
-        message = bleach.clean(request.POST.get('message', ''), tags=[], strip=True)
-
-        if not name or not email or not message:
-            messages.error(request, 'Veuillez remplir tous les champs obligatoires.')
+        message = ContactForm(request.POST)
+        if message.is_valid():
+            name = bleach.clean(message.cleaned_data['name'],strip=True,tags=[],attributes={})
+            email = bleach.clean(message.cleaned_data['email'],strip=True,tags=[],attributes={})
+            subject = bleach.clean(message.cleaned_data['subject'],strip=True,tags=[],attributes={})
+            message = bleach.clean(message.cleaned_data['message'],strip=True,tags=[],attributes={})
+            Message.objects.create(
+                name=name,
+                email=email,
+                subject=subject,
+                message=message,
+            )
+            message.success(request,'Votre message a bien été envoyé.')
             return redirect('contact')
-
-        try:
-            validate_email(email)
-        except ValidationError:
-            messages.error(request, 'Adresse email invalide.')
-            return redirect('contact')
-
-        Message.objects.create(
-            name=name,
-            email=email,
-            subject=subject,
-            message=message,
-        )
-        messages.success(request, 'Votre message a bien été envoyé.')
-    return render(request, 'page/contact.html')
+        else:
+            print('erreur',message.errors)
+    else:
+        message = ContactForm()
+    return render(request, 'page/contact.html',context={
+        'form':ContactForm
+    })
