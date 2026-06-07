@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HAVEN Admin{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#f5f5f3] font-sans">
+
+<div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-56 bg-[#0f0f0f] flex flex-col flex-shrink-0">
+
+        <!-- Logo -->
+        <div class="px-4 py-5 border-b border-[#1f1f1f]">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">H</div>
+                <div>
+                    <p class="text-white text-sm font-bold tracking-tight">HAVEN</p>
+                    <p class="text-[#525252] text-xs">Administration</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
+
+            <p class="text-[#3f3f3f] text-xs font-semibold uppercase tracking-widest px-2 py-2">Gestion</p>
+
+            <a href="{% url 'staff_stats' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if request.resolver_match.url_name == 'staff_stats' %}bg-[#1a1a1a] text-white{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+                ◈ Tableau de bord
+            </a>
+
+            <a href="{% url 'staff_listings' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if request.resolver_match.url_name == 'staff_listings' %}bg-[#1a1a1a] text-white{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+                ⊞ Annonces
+                {% if pending_listings_count %}
+                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ pending_listings_count }}</span>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'staff_users' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if request.resolver_match.url_name == 'staff_users' %}bg-[#1a1a1a] text-white{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+                ◎ Utilisateurs
+            </a>
+
+            <a href="{% url 'staff_reports' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if request.resolver_match.url_name == 'staff_reports' %}bg-[#1a1a1a] text-white{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+                ⚑ Signalements
+                {% if pending_reports_count %}
+                <span class="ml-auto bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ pending_reports_count }}</span>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'staff_messages' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if request.resolver_match.url_name == 'staff_messages' %}bg-[#1a1a1a] text-white{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+                ✉ Messages
+            </a>
+
+            <p class="text-[#3f3f3f] text-xs font-semibold uppercase tracking-widest px-2 pt-4 pb-2">Système</p>
+
+            <a href="{% url 'admin:index' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#737373] hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                ⚙ Admin Django
+            </a>
+
+            <a href="{% url 'home' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#737373] hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                ↗ Voir le site
+            </a>
+
+        </nav>
+
+        <!-- User -->
+        <div class="px-3 py-3 border-t border-[#1a1a1a] flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                {{ request.user.username|first|upper }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[#e5e5e5] text-xs font-semibold truncate">{{ request.user.username }}</p>
+                <p class="text-[#525252] text-xs">Staff</p>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-[#525252] hover:text-white text-sm transition-colors">⏏</button>
+            </form>
+        </div>
+
+    </aside>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Topbar -->
+        <header class="bg-white border-b border-gray-200 px-5 h-12 flex items-center justify-between flex-shrink-0">
+            <div>
+                <h1 class="text-sm font-bold text-[#0f0f0f]">{% block page_title %}Tableau de bord{% endblock %}</h1>
+                <p class="text-xs text-gray-400">{% block page_subtitle %}Vue d'ensemble{% endblock %}</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-400">{{ request.user.username }}</span>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 overflow-y-auto p-5">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}bg-red-50 text-red-600{% else %}bg-green-50 text-green-700{% endif %} text-sm rounded-xl px-4 py-3 mb-5">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.body.addEventListener('htmx:configRequest', (e) => {
+        e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+</script>
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

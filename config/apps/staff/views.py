@@ -20,6 +20,48 @@ Verifier si l'ulisateur est memebre du staff avant d'afficher les pages ou de pe
 Sinon retourner une erreur 404 pour ne pas révéler l'existence de ces pages aux utilisateurs non autorisés.
 """
 
+def staff_index(request):
+    if not request.user.is_staff:
+        raise Http404()
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
+    listings_count = Listing.objects.count()
+    approved_listings_count = Listing.objects.filter(is_approved=True).count()
+    not_approved_listings_count = listings_count - approved_listings_count
+    recent_listings_count = Listing.objects.filter(created_at__gte=thirty_days_ago).count()
+
+    User = get_user_model()
+    users_count = User.objects.count()
+    active_users_count = User.objects.filter(is_active=True).count()
+    not_active_users_count = users_count - active_users_count
+    recent_users_count = User.objects.filter(date_joined__gte=thirty_days_ago).count()
+
+    visits_count = Visit.objects.count()
+    pending_visits_count = Visit.objects.filter(status='En attente').count()
+    accepted_visits_count = Visit.objects.filter(status='Acceptée').count()
+
+    repported_listing_count = Report.objects.count()
+    resolved_reported_listing_count = Report.objects.filter(is_resolved=True).count()
+    not_resolved_reported_listing_count = repported_listing_count - resolved_reported_listing_count 
+
+    context = {
+        'listings_count': listings_count,
+        'approved_listings_count': approved_listings_count,
+        'not_approved_listings_count': not_approved_listings_count,
+        'recent_listings_count': recent_listings_count,
+        'users_count': users_count,
+        'active_users_count': active_users_count,
+        'not_active_users_count': not_active_users_count,
+        'recent_users_count': recent_users_count,
+        'visits_count': visits_count,
+        'pending_visits_count': pending_visits_count,
+        'accepted_visits_count': accepted_visits_count,
+        'reported_listing_count':repported_listing_count,
+        'resolved_reported_listing_count':resolved_reported_listing_count,
+        'not_resolved_reported_listing_count':not_resolved_reported_listing_count,
+    }
+    return render(request,'staff/index.html',context=context)
+
 def staff_listings(request):
     if not request.user.is_staff:
         raise Http404()
