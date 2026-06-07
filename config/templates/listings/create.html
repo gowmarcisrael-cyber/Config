@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Publier une annonce — HAVEN{% endblock %}
 
 
@@ -201,11 +202,11 @@
 
         <div class="bg-white border border-gray-100 rounded-2xl p-6">
             <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Photos</h2>
-            <label class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-10 cursor-pointer hover:border-orange-400 transition-colors">
+            <label id="dropZone" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-10 cursor-pointer hover:border-orange-400 transition-colors">
                 <span class="text-3xl mb-2">📷</span>
                 <span class="text-sm font-medium text-gray-600">Cliquez pour ajouter des photos</span>
                 <span class="text-xs text-gray-400 mt-1">JPG, PNG — plusieurs fichiers acceptés</span>
-                <input type="file" name="images" multiple accept="image/*" class="hidden"
+                <input type="file" name="images" multiple accept="image/*" class="hidden" id="fileInput"
                        onchange="previewImages(this)">
             </label>
             <div id="preview" class="flex flex-wrap gap-2 mt-3"></div>
@@ -218,23 +219,5 @@
 
     </form>
 </div>
-
-<script>
-function previewImages(input) {
-    const preview = document.getElementById('preview');
-    preview.innerHTML = '';
-    if (input.files) {
-        [...input.files].forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.className = 'h-20 w-28 object-cover rounded-lg border border-gray-200';
-                preview.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-}
-</script>
+<script src="{% static 'js/fileInput.js' %}"></script>
 {% endblock %}

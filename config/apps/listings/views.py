@@ -286,3 +286,83 @@ def map_view(request):
     'listings_json': json.dumps(list(listings), cls=DjangoJSONEncoder)
     }
     return render(request, 'listings/map.html', context)
+
+from groq import Groq
+import json
+from decouple import config
+
+client = Groq(api_key=config('GROQ_API_KEY'))
+
+def ai_search(request):
+    results = []
+    query = ''
+    
+    if request.method == 'POST':
+        query = request.POST.get('query', '')
+        
+        if query:
+            # Demander à l'IA d'extraire les critères
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+    "role": "system",
+    "content": """Tu es un assistant immobilier expert au Burkina Faso.
+    Analyse la demande et extrais les critères de recherche.
+    Retourne UNIQUEMENT un JSON valide, sans markdown, sans explication.
+    
+    Règles importantes :
+    - property_type doit être exactement : "Appartement", "Maison", "Terrain", "Local commercial" ou null
+    - status doit être exactement : "En vente", "A louer" ou null
+    - Les prix sont en FCFA
+    - Si un critère n'est pas mentionné, mets null
+    
+    Format strict :
+    {
+        "property_type": "...",
+        "status": "...",
+        "city": "...",
+        "price_max": nombre ou null,
+        "bedrooms_min": nombre ou null,
+        "area_min": nombre ou null
+    }"""
+},
+                    {
+                        "role": "user",
+                        "content": query
+                    }
+                ],
+                max_tokens=300,
+            )
+
+            try:
+                criteria = json.loads(response.choices[0].message.content)
+                
+                listings = Listing.objects.filter(
+                    is_available=True,
+                    is_approved=True
+                ).select_related('user').prefetch_related('likes', 'images')
+
+                if criteria.get('property_type'):
+                    listings = listings.filter(property_type=criteria['property_type'])
+                if criteria.get('status'):
+                    listings = listings.filter(status=criteria['status'])
+                if criteria.get('city'):
+                    listings = listings.filter(city__icontains=criteria['city'])
+                if criteria.get('price_max'):
+                    listings = listings.filter(price__lte=criteria['price_max'])
+                if criteria.get('bedrooms_min'):
+                    listings = listings.filter(bedrooms__gte=criteria['bedrooms_min'])
+                if criteria.get('area_min'):
+                    listings = listings.filter(area__gte=criteria['area_min'])
+
+                results = listings[:6]
+
+            except (json.JSONDecodeError, Exception):
+                results = []
+
+    context = {
+        'results': results,
+        'query': query,
+    }
+    return render(request, 'listings/ai_search.html', context)
