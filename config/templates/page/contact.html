@@ -86,11 +86,13 @@
                 <label class="block text-sm font-medium text-gray-600 mb-1">Nom complet <span class="text-red-400">*</span></label>
                 <input type="text" name="name" placeholder="Votre nom"
                     class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if form.name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-600 mb-1">Email <span class="text-red-400">*</span></label>
                 <input type="email" name="email" placeholder="votre@email.com"
                     class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-600 mb-1">Sujet</label>
@@ -101,6 +103,7 @@
                 <label class="block text-sm font-medium text-gray-600 mb-1">Message <span class="text-red-400">*</span></label>
                 <textarea name="message" rows="4" placeholder="Votre message..."
                         class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"></textarea>
+                        {% if form.message.errors %}<p class="text-xs text-red-500 mt-1">{{ form.message.errors.0 }}</p>{% endif %}
             </div>
             <button type="submit"
                     class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">

@@ -11,24 +11,24 @@ def contact(request):
         if request.POST.get('q'):
             messages.success(request, 'Votre message a bien été envoyé.')
             return redirect('contact')
-        message = ContactForm(request.POST)
-        if message.is_valid():
-            name = bleach.clean(message.cleaned_data['name'],strip=True,tags=[],attributes={})
-            email = bleach.clean(message.cleaned_data['email'],strip=True,tags=[],attributes={})
-            subject = bleach.clean(message.cleaned_data['subject'],strip=True,tags=[],attributes={})
-            message = bleach.clean(message.cleaned_data['message'],strip=True,tags=[],attributes={})
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = bleach.clean(form.cleaned_data['name'],strip=True,tags=[],attributes={})
+            email = bleach.clean(form.cleaned_data['email'],strip=True,tags=[],attributes={})
+            subject = bleach.clean(form.cleaned_data['subject'],strip=True,tags=[],attributes={})
+            message = bleach.clean(form.cleaned_data['message'],strip=True,tags=[],attributes={})
             Message.objects.create(
                 name=name,
                 email=email,
                 subject=subject,
                 message=message,
             )
-            message.success(request,'Votre message a bien été envoyé.')
+            messages.success(request,'Votre message a bien été envoyé.')
             return redirect('contact')
         else:
-            print('erreur',message.errors)
+            print('erreur',form.errors)
     else:
-        message = ContactForm()
+        form = ContactForm()
     return render(request, 'page/contact.html',context={
-        'form':ContactForm
+        'form':form
     })
