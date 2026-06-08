@@ -45,10 +45,12 @@ def search(request):
     property_type = request.GET.get('property_type')
     price_max = request.GET.get('price_max')
     query = request.GET.get('q')
+    longitude = float(request.GET.get('longitude') or 0)
+    latitude = float(request.GET.get('latitude') or 0)
 
     if status:
         listings = listings.filter(status=status)
-    if city:
+    if city and not longitude and not latitude:
         listings = listings.filter(city__icontains=city)
     if property_type:
         listings = listings.filter(property_type=property_type)
@@ -57,6 +59,15 @@ def search(request):
             listings = listings.filter(price__lte=int(price_max))
         except ValueError:
             pass
+    
+    if longitude and latitude:
+        try:
+            listings = listings.filter(
+                longitude__range=(longitude - 0.3, longitude + 0.3),
+                latitude__range=(latitude - 0.3, latitude + 0.3),
+            )
+        except (ValueError,TypeError):
+            return HttpResponse(status=400)
 
     if query:
         search_vector = (
@@ -80,7 +91,28 @@ def search(request):
         'statuses': Listing.STATUS[:2],
         'filters': request.GET,
     }
+    if request.headers.get('HX-Request'):
+        return render(request, 'listings/partials/listings_results.html', context)
     return render(request, 'listings/search.html', context)
+
+@require_POST
+def map_recommandation(request):
+    try:
+        longitude = float(request.POST.get('longitude'))
+        latitude = float(request.POST.get('latitude'))
+    except (ValueError,TypeError):
+        return HttpResponse(status=400)
+    delta = 0.1
+    listings = Listing.objects.filter(
+        is_available=True,
+        is_approved=True,
+        longitude__range=(longitude - delta, longitude + delta),
+        latitude__range=(latitude - delta, latitude + delta),
+    ).order_by('-created_at')[:5]
+
+    return render(request, 'listings/map_recommandation.html',context={
+        "listing":listings,
+    })
 
 def detail(request, slug):
     listing = get_object_or_404(

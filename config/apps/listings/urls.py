@@ -14,4 +14,5 @@ urlpatterns = [
     path('dashboard/listings/favorite/',views.listings_favorite,name='favorite'),
     path('autocomplete/cities/', views.city_autocomplete, name='city_autocomplete'),
     path('map/', views.map_view, name='map'),
+    path('recommandation/',views.map_recommandation,name='map_recommandation'),
 ]
