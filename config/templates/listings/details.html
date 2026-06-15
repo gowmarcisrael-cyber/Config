@@ -1,282 +1,271 @@
 {% extends 'base.html' %}
 {% load listing_tags %}
 {% load static %}
-{% block title %}{{ listing.title }} — HAVEN{% endblock %}
 {% load l10n %}
+{% block title %}{{ listing.title }} — HAVEN{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-6 py-10">
+<div class="max-w-5xl mx-auto px-4 py-8">
 
     <!-- Fil d'ariane -->
-    <p class="text-sm text-gray-400 mb-6">
-        <a href="{% url 'home' %}" class="hover:text-orange-500">Accueil</a> /
-        <a href="{% url 'search' %}" class="hover:text-orange-500">Annonces</a> /
-        <span class="text-gray-600">{{ listing.title }}</span>
+    <p class="text-xs text-gray-400 mb-6 flex items-center gap-1">
+        <a href="{% url 'home' %}" class="hover:text-orange-500">Accueil</a>
+        <span>/</span>
+        <a href="{% url 'search' %}" class="hover:text-orange-500">Annonces</a>
+        <span>/</span>
+        <span class="text-gray-600 truncate max-w-xs">{{ listing.title }}</span>
     </p>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- Colonne gauche : galerie + infos -->
+        <!-- Colonne gauche -->
         <div class="lg:col-span-2">
 
             <!-- Galerie -->
             {% if images %}
-            <div class="mb-4 rounded-xl overflow-hidden h-72 bg-gray-100">
+            <div class="mb-3 rounded-2xl overflow-hidden h-72 bg-gray-100 relative">
                 <img id="main-img" src="{{ images.0.image.url }}" alt="{{ listing.title }}"
                      class="w-full h-full object-cover">
-            </div>
-            {% if images|length > 1 %}
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
-                {% for img in images %}
-                <img src="{{ img.image.url }}"
-                     onclick="document.getElementById('main-img').src='{{ img.image.url }}'"
-                     class="h-16 w-24 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-orange-400 transition flex-shrink-0">
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% else %}
-            <div class="mb-6 rounded-xl h-72 bg-gray-100 flex items-center justify-center text-6xl">🏠</div>
-            {% endif %}
-
-            <!-- Titre + badges -->
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-slate-800 mb-1">{{ listing.title }}</h1>
-                    <p class="text-sm text-gray-400">📍 {{ listing.city }}</p>
-                </div>
-                <span class="text-xs font-semibold px-3 py-1 rounded-full mt-1
+                <!-- Badge statut sur l'image -->
+                <span class="absolute top-3 left-3 text-xs font-semibold px-3 py-1 rounded-full
                     {% if listing.status == 'A louer' %}bg-green-100 text-green-800
                     {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
                     {% else %}bg-gray-100 text-gray-600{% endif %}">
                     {{ listing.status }}
                 </span>
+                {% if request.user.is_authenticated %}
+                <div class="absolute top-3 right-3">
+                    {% is_favorited request.user listing as is_fav %}
+                    {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
+                </div>
+                {% endif %}
+            </div>
+            {% if images|length > 1 %}
+            <div class="flex gap-2 mb-5 overflow-x-auto pb-1">
+                {% for img in images %}
+                <img src="{{ img.image.url }}"
+                     onclick="document.getElementById('main-img').src='{{ img.image.url }}'"
+                     class="h-14 w-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-orange-400 transition flex-shrink-0">
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="mb-5 rounded-2xl h-72 bg-gray-100 flex items-center justify-center text-6xl">🏠</div>
+            {% endif %}
+
+            <!-- Titre -->
+            <div class="mb-5">
+                <h1 class="text-2xl font-extrabold text-slate-800 mb-1 tracking-tight">{{ listing.title }}</h1>
+                <p class="text-sm text-gray-400">📍 {{ listing.city }}</p>
             </div>
 
             <!-- Caractéristiques -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                 {% if listing.bedrooms %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
                     <p class="text-xl mb-1">🛏</p>
-                    <p class="text-sm font-semibold text-slate-700">{{ listing.bedrooms }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ listing.bedrooms }}</p>
                     <p class="text-xs text-gray-400">Chambres</p>
                 </div>
                 {% endif %}
                 {% if listing.bathrooms %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
                     <p class="text-xl mb-1">🚿</p>
-                    <p class="text-sm font-semibold text-slate-700">{{ listing.bathrooms }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ listing.bathrooms }}</p>
                     <p class="text-xs text-gray-400">Salles de bain</p>
                 </div>
                 {% endif %}
                 {% if listing.area %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
                     <p class="text-xl mb-1">📐</p>
-                    <p class="text-sm font-semibold text-slate-700">{{ listing.area }} m²</p>
+                    <p class="text-sm font-bold text-slate-700">{{ listing.area }} m²</p>
                     <p class="text-xs text-gray-400">Superficie</p>
                 </div>
                 {% endif %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
                     <p class="text-xl mb-1">🏷</p>
-                    <p class="text-sm font-semibold text-slate-700">{{ listing.property_type }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ listing.property_type }}</p>
                     <p class="text-xs text-gray-400">Type</p>
                 </div>
             </div>
 
             <!-- Description -->
-            <div>
-                <h2 class="text-base font-semibold text-slate-800 mb-2">Description</h2>
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+                <h2 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Description</h2>
                 <p class="text-sm text-gray-600 leading-relaxed">{{ listing.description }}</p>
             </div>
 
+            <!-- Carte -->
+            {% if listing.latitude and listing.longitude %}
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+                <h2 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">Localisation</h2>
+                <div id="map" class="w-full h-56 rounded-xl overflow-hidden"></div>
+            </div>
+            {% endif %}
+
         </div>
 
-        <!-- Colonne droite : prix + actions -->
+        <!-- Colonne droite -->
         <div class="lg:col-span-1">
-            <div class="bg-white border border-gray-100 rounded-2xl p-5 sticky top-20">
-                <p class="text-2xl font-bold text-orange-500 mb-1">
-                    {{ listing.price|floatformat:0 }} FCFA
-                </p>
-                {% if listing.status == 'A louer' %}
-                <p class="text-xs text-gray-400 mb-4">par mois</p>
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 sticky top-20 space-y-4">
+
+                <!-- Prix -->
+                <div>
+                    <p class="text-3xl font-extrabold text-orange-500 tracking-tight">
+                        {{ listing.price|floatformat:0 }} <span class="text-base font-medium text-gray-400">FCFA</span>
+                    </p>
+                    {% if listing.status == 'A louer' %}
+                    <p class="text-xs text-gray-400">par mois</p>
+                    {% endif %}
+                </div>
+
+                <!-- Infos -->
+                <div class="border-t border-gray-50 pt-4 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Type</span>
+                        <span class="font-semibold text-slate-700">{{ listing.property_type }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Statut</span>
+                        <span class="font-semibold text-slate-700">{{ listing.status }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Ville</span>
+                        <span class="font-semibold text-slate-700">{{ listing.city }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Publié le</span>
+                        <span class="font-semibold text-slate-700">{{ listing.created_at|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                {% if request.user.is_authenticated and request.user != listing.user %}
+                <div class="border-t border-gray-50 pt-4 space-y-2">
+                    <a href="{% url 'request_visit' listing.slug %}"
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm text-center transition-colors">
+                        📅 Demander une visite
+                    </a>
+                    <button disabled
+                            class="w-full border border-gray-200 text-gray-400 font-medium py-2.5 rounded-xl text-sm cursor-not-allowed">
+                        💬 Contacter le vendeur
+                    </button>
+                    <p class="text-center text-xs text-gray-300">Chat bientôt disponible</p>
+                </div>
+                {% elif not request.user.is_authenticated %}
+                <div class="border-t border-gray-50 pt-4">
+                    <a href="{% url 'login' %}"
+                       class="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm text-center transition-colors">
+                        Connectez-vous pour contacter
+                    </a>
+                </div>
                 {% endif %}
 
-                <div class="border-t border-gray-100 pt-4 mb-4 text-sm text-gray-500 space-y-2">
-                    <div class="flex justify-between">
-                        <span>Type</span>
-                        <span class="font-medium text-slate-700">{{ listing.property_type }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Statut</span>
-                        <span class="font-medium text-slate-700">{{ listing.status }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Ville</span>
-                        <span class="font-medium text-slate-700">{{ listing.city }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Publié le</span>
-                        <span class="font-medium text-slate-700">{{ listing.created_at|date:"d/m/Y" }}</span>
+                <!-- Signaler -->
+                {% if request.user.is_authenticated and request.user != listing.user %}
+                <div x-data="{ open: false }" class="border-t border-gray-50 pt-3">
+                    <button @click="open = true"
+                            class="w-full border border-red-100 text-red-400 hover:bg-red-50 font-medium py-2 rounded-xl text-xs transition-colors">
+                        🚩 Signaler cette annonce
+                    </button>
+
+                    <!-- Modale -->
+                    <div x-show="open" x-transition
+                         class="fixed inset-0 z-50 flex items-center justify-center px-4"
+                         style="background: rgba(0,0,0,0.4);">
+                        <div @click.away="open = false"
+                             class="bg-white rounded-2xl p-6 w-full max-w-md">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-800">Signaler l'annonce</h3>
+                                <button @click="open = false" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+                            </div>
+                            <form method="post" action="{% url 'report_listing' listing.slug %}">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Raison</label>
+                                    <select name="reason"
+                                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                                        {% for value, label in report_reasons %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Message (optionnel)</label>
+                                    <textarea name="message" rows="3"
+                                              placeholder="Décrivez le problème..."
+                                              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"></textarea>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button type="button" @click="open = false"
+                                            class="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+                                        Annuler
+                                    </button>
+                                    <button type="submit"
+                                            class="flex-1 bg-red-400 hover:bg-red-500 text-white font-medium py-2.5 rounded-xl text-sm transition-colors">
+                                        Envoyer
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
+                {% endif %}
 
-                <!-- Placeholder contact -->
-                <button disabled class="w-full bg-orange-500 text-white font-semibold py-2.5 rounded-xl text-sm opacity-50 cursor-not-allowed mb-2">
-                    Contacter le vendeur
-                </button>
-                <button class="w-full border border-orange-400 text-orange-500 font-semibold py-2.5 rounded-xl text-sm opacity-50">
-                    <a href="{% url 'request_visit' listing.slug %}">Demander une visite</a>
-                </button>
-                <p class="text-center text-xs text-gray-400 mt-2">Bientôt disponible</p>
             </div>
         </div>
 
     </div>
-    <!-- Carte -->
-    {% if listing.latitude and listing.longitude %}
-    <div class="mt-8">
-        <h2 class="text-base font-semibold text-slate-800 mb-3">Localisation</h2>
-        <div id="map" class="w-full z-0 h-64 rounded-2xl overflow-hidden border border-gray-100"></div>
-    </div>
-    {% endif %}
-
-    {% if listing.latitude and listing.longitude %}
-    <script>
-        const map = L.map('map').setView([{{ listing.latitude|unlocalize }}, {{ listing.longitude|unlocalize }}], 15);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        L.marker([{{ listing.latitude|unlocalize }}, {{ listing.longitude|unlocalize }}])
-            .addTo(map)
-            .bindPopup('<b>{{ listing.title }}</b><br>{{ listing.city }}')
-            .openPopup();
-    </script>
-    {% endif %}
-    
-    <!-- Bouton signaler -->
-    {% if request.user.is_authenticated and request.user != listing.user %}
-    <div x-data="{ open: false }">
-        <button @click="open = true"
-                class="w-full border border-red-100 text-red-400 hover:bg-red-50 font-medium py-2 rounded-xl text-sm transition-colors mt-2">
-            🚩 Signaler cette annonce
-        </button>
-
-        <!-- Modale -->
-        <div x-show="open" x-transition
-            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-            style="background: rgba(0,0,0,0.4);">
-            <div @click.away="open = false"
-                class="bg-white rounded-2xl p-6 w-full max-w-md">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800">Signaler l'annonce</h3>
-                    <button @click="open = false" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-                </div>
-                <form method="post" action="{% url 'report_listing' listing.slug %}">
-                    {% csrf_token %}
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Raison</label>
-                        <select name="reason"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                            {% for value, label in report_reasons %}
-                            <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Message (optionnel)</label>
-                        <textarea name="message" rows="3"
-                                placeholder="Décrivez le problème..."
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"></textarea>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="button" @click="open = false"
-                                class="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl text-sm hover:bg-gray-50 transition-colors">
-                            Annuler
-                        </button>
-                        <button type="submit"
-                                class="flex-1 bg-red-400 hover:bg-red-500 text-white font-medium py-2.5 rounded-xl text-sm transition-colors">
-                            Envoyer
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 
     <!-- Annonces similaires -->
     {% if similars %}
-    <div class="mt-14">
-        <h2 class="text-lg font-semibold text-slate-800 mb-5">Annonces similaires</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="mt-12">
+        <h2 class="text-lg font-bold text-slate-800 mb-5">Annonces similaires</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {% for item in similars %}
-             <div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full max-w-[300px] mx-auto">
-    
-            <!-- Image -->
-            <div class="relative h-48 bg-gray-100">
-                {% if item.get_first_image %}
-                    <img src="{{ item.get_first_image }}" alt="{{ item.title }}"
-                        class="w-full h-full object-cover">
-                {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-gray-50 to-gray-100">🏠</div>
-                {% endif %}
-
-                <!-- Badge statut -->
-                <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
-                    {% if listing.status == 'A louer' %}bg-green-100 text-green-800
-                    {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
-                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                    {{ item.status }}
-                </span>
-
-                <!-- Bouton favori -->
-                {% if item.user.is_authenticated %}
-                <div class="absolute top-2 right-2">
-                    {% is_favorited request.user item as is_fav %}
-                    {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Contenu -->
-            <div class="p-4">
-                <!-- Ville + Type -->
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-1 text-xs text-gray-400 font-medium">
-                        <img src="{% static 'images/gps.png' %}" alt="" class="w-3.5 h-3.5">
-                        <span>{{ item.city }}</span>
-                    </div>
-                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">
-                        {{ item.property_type }}
+            <div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full sm:w-[300px] mx-auto">
+                <div class="relative h-44 bg-gray-100">
+                    {% if item.get_first_image %}
+                        <img src="{{ item.get_first_image }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-gray-50 to-gray-100">🏠</div>
+                    {% endif %}
+                    <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
+                        {% if item.status == 'A louer' %}bg-green-100 text-green-800
+                        {% elif item.status == 'En vente' %}bg-blue-100 text-blue-800
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ item.status }}
                     </span>
-                </div>
-
-                <!-- Titre -->
-                <h3 class="font-bold text-slate-800 text-sm mb-1 truncate">{{ listing.title }}</h3>
-
-                <!-- Description -->
-                <p class="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{{ listing.description }}</p>
-
-                <!-- Prix -->
-                <p class="text-orange-500 font-extrabold text-base mb-3">
-                    {{ item.price|floatformat:0 }}
-                    <span class="text-xs font-medium text-gray-400">FCFA{% if listing.status == 'A louer' %}/mois{% endif %}</span>
-                </p>
-
-                <!-- Caractéristiques + Lien -->
-                <div class="flex items-center justify-between border-t border-gray-50 pt-3">
-                    <div class="flex gap-3 text-xs text-gray-400">
-                        {% if item.bedrooms %}<span>🛏 {{ item.bedrooms }}</span>{% endif %}
-                        {% if item.bathrooms %}<span>🚿 {{ item.bathrooms }}</span>{% endif %}
-                        {% if item.area %}<span>📐 {{ item.area }}m²</span>{% endif %}
+                    {% if request.user.is_authenticated %}
+                    <div class="absolute top-2 right-2">
+                        {% is_favorited request.user item as is_fav %}
+                        {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
                     </div>
-                    <a href="{% url 'listing_detail' item.slug %}"
-                    class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
-                        Voir →
-                    </a>
+                    {% endif %}
                 </div>
-            </div>
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs text-gray-400">📍 {{ item.city }}</p>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">{{ item.property_type }}</span>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm mb-1 truncate">{{ item.title }}</h3>
+                    <p class="text-xs text-gray-400 mb-3 line-clamp-2">{{ item.description }}</p>
+                    <p class="text-orange-500 font-extrabold text-base mb-3">
+                        {{ item.price|floatformat:0 }}
+                        <span class="text-xs font-medium text-gray-400">FCFA{% if item.status == 'A louer' %}/mois{% endif %}</span>
+                    </p>
+                    <div class="flex items-center justify-between border-t border-gray-50 pt-3">
+                        <div class="flex gap-3 text-xs text-gray-400">
+                            {% if item.bedrooms %}<span>🛏 {{ item.bedrooms }}</span>{% endif %}
+                            {% if item.bathrooms %}<span>🚿 {{ item.bathrooms }}</span>{% endif %}
+                            {% if item.area %}<span>📐 {{ item.area }}m²</span>{% endif %}
+                        </div>
+                        <a href="{% url 'listing_detail' item.slug %}"
+                           class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
+                            Voir →
+                        </a>
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -284,4 +273,21 @@
     {% endif %}
 
 </div>
+
+{% if listing.latitude and listing.longitude %}
+<script>
+    const mapEl = document.getElementById('map');
+    if (mapEl) {
+        const detailMap = L.map(mapEl).setView([{{ listing.latitude|unlocalize }}, {{ listing.longitude|unlocalize }}], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(detailMap);
+        L.marker([{{ listing.latitude|unlocalize }}, {{ listing.longitude|unlocalize }}])
+            .addTo(detailMap)
+            .bindPopup('<b>{{ listing.title }}</b><br>{{ listing.city }}')
+            .openPopup();
+    }
+</script>
+{% endif %}
+
 {% endblock %}
