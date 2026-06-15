@@ -7,6 +7,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     avatar = models.ImageField(upload_to='profile/',blank=True,null=True)
     email_verified = models.BooleanField(default=False)
+    phone = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    phone_verified = models.BooleanField(default=False)
     def __str__(self):
         return self.username
     

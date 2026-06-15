@@ -15,6 +15,7 @@ from django.core.mail import send_mail,EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.conf import settings
+import re
 import uuid
 # Create your views here.
 User = get_user_model()
@@ -185,6 +186,25 @@ def profile(request):
                     messages.success(request, 'Mot de passe mis à jour.')
                 else:
                     messages.error(request, 'Mot de passe actuel incorrect.')
+            import re
+
+        elif action == 'profile':
+            # ... code existant ...
+            
+            phone = request.POST.get('phone', '').replace(' ', '').replace('-', '')
+            if phone:
+                pattern = r'^(\+226)?[0-9]{8}$'
+                if not re.match(pattern, phone):
+                    messages.error(request, 'Numéro invalide. Format : +226XXXXXXXX ou XXXXXXXX')
+                    return redirect('profile')
+                # Vérifier unicité
+                if get_user_model().objects.filter(phone=phone).exclude(pk=request.user.pk).exists():
+                    messages.error(request, 'Ce numéro est déjà utilisé.')
+                    return redirect('profile')
+                request.user.phone = phone
+            
+            request.user.save()
+            messages.success(request, 'Profil mis à jour.')
 
         return redirect('profile')
 
