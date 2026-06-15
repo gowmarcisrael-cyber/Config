@@ -37,3 +37,9 @@ urlpatterns = [
     settings.MEDIA_URL,
     document_root = settings.MEDIA_ROOT
 )
+from django.views.generic import TemplateView
+
+urlpatterns += [
+    path('privacy/', TemplateView.as_view(template_name='page/privacy.html'), name='privacy'),
+    path('terms/', TemplateView.as_view(template_name='page/terms.html'), name='terms'),
+]
