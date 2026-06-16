@@ -1,51 +1,67 @@
 {% extends 'dashboard/base.html' %}
-{% block title %}Mes demandes envoyées — HAVEN{% endblock %}
+{% block title %}Visites envoyées — HAVEN{% endblock %}
+{% block page_title %}Visites envoyées{% endblock %}
+{% block page_subtitle %}Vos demandes de visite{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-6 py-10">
 
-    <div class="flex items-center justify-between mb-8">
-        <h1 class="text-2xl font-bold text-slate-800">Demandes envoyées</h1>
-        <a href="{% url 'dashboard' %}" class="text-sm text-orange-500 hover:underline">← Tableau de bord</a>
-    </div>
+<div class="flex items-center justify-between mb-6">
+    <p class="text-xs text-gray-400">{{ visits|length }} demande{{ visits|length|pluralize }} envoyée{{ visits|length|pluralize }}</p>
+</div>
 
-    <div class="space-y-4">
-        {% for visit in visits %}
-        <div class="bg-white border border-gray-100 rounded-2xl p-5 flex gap-4 items-center">
-            <div class="w-16 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                {% if visit.listing.get_first_image %}
-                    <img src="{{ visit.listing.get_first_image }}" class="w-full h-full object-cover">
-                {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-xl">🏠</div>
-                {% endif %}
+<div class="bg-white border border-[#f0f0ee] rounded-xl overflow-hidden">
+    {% for visit in visits %}
+    <div id="visit-sent-{{ visit.pk }}"
+         class="flex flex-col sm:flex-row gap-4 p-4 border-b border-[#f8f7f4] last:border-0 hover:bg-gray-50 transition-colors">
+
+        <!-- Image -->
+        <div class="w-full sm:w-16 h-32 sm:h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+            {% if visit.listing.get_first_image %}
+                <img src="{{ visit.listing.get_first_image }}" class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-2xl">🏠</div>
+            {% endif %}
+        </div>
+
+        <!-- Infos -->
+        <div class="flex-1 min-w-0">
+            <a href="{% url 'listing_detail' visit.listing.slug %}"
+               class="font-semibold text-slate-800 text-sm hover:text-orange-500 transition-colors truncate block">
+                {{ visit.listing.title }}
+            </a>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+                <span class="text-xs text-gray-400">👤 {{ visit.receiver.username }}</span>
+                <span class="text-gray-200">·</span>
+                <span class="text-xs text-gray-400">📅 {{ visit.date|date:"d/m/Y à H:i" }}</span>
             </div>
-            <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-slate-800 text-sm truncate">{{ visit.listing.title }}</h3>
-                <p class="text-xs text-gray-400 mt-0.5">📅 {{ visit.date|date:"d/m/Y à H:i" }}</p>
-                {% if visit.message %}
-                <p class="text-xs text-gray-500 mt-1 truncate">{{ visit.message }}</p>
-                {% endif %}
-            </div>
-            <div class="flex-shrink-0">
-                {% include 'visits/partials/visits_status.html' %}
-            </div>
+            {% if visit.message %}
+            <p class="text-xs text-gray-500 mt-1.5 bg-gray-50 rounded-lg px-3 py-1.5 line-clamp-2">
+                "{{ visit.message }}"
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Statut + Annuler -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+            {% include 'visits/partials/visits_status.html' %}
             {% if visit.status != 'Annulée' and visit.status != 'Refusée' %}
             <button hx-post="{% url 'cancel_visit' visit.pk %}"
-                    hx-target=".visit-status"
+                    hx-target="#visit-sent-{{ visit.pk }}"
                     hx-swap="outerHTML"
                     hx-confirm="Annuler cette visite ?"
-                    class="text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
+                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 transition-colors">
                 Annuler
             </button>
             {% endif %}
         </div>
-        {% empty %}
-        <div class="text-center py-16 text-gray-400">
-            <p class="text-4xl mb-3">📅</p>
-            <p class="text-sm">Aucune demande envoyée.</p>
-        </div>
-        {% endfor %}
-    </div>
 
+    </div>
+    {% empty %}
+    <div class="text-center py-16 text-gray-400">
+        <p class="text-4xl mb-3">📅</p>
+        <p class="text-sm">Aucune demande envoyée.</p>
+    </div>
+    {% endfor %}
 </div>
+
 {% endblock %}

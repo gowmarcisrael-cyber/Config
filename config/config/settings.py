@@ -63,6 +63,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django_browser_reload.middleware.BrowserReloadMiddleware',
+    'apps.staff.middleware.StaffMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
