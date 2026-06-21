@@ -46,6 +46,7 @@ class Listing(models.Model):
             if Listing.objects.filter(slug=slug).exclude(id=self.id).exists():
                 slug = f'{base_slug}-{uuid.uuid4().hex[:6]}'
             self.slug = slug
+        self.is_available = self.status in ['En vente', 'A louer']
         super().save(*args,**kwargs)
 
     def __str__(self):

@@ -38,7 +38,7 @@ def search(request):
     listings = Listing.objects.filter(
         is_available=True,
         is_approved=True
-    ).select_related('user').prefetch_related('likes','images')
+    ).exclude(status__in=['Vendu','Loué']).select_related('user').prefetch_related('likes','images')
 
     status = request.GET.get('status')
     city = request.GET.get('city')
@@ -153,7 +153,7 @@ def create_listing(request):
         form = ListingForm()
     return render(request, 'listings/create.html', {'form': form})
 
-# listings/views.py
+
 def get_dashboard_context(user):
     visit_stats = Visit.objects.aggregate(
         received=Count('id', filter=Q(receiver=user)),
@@ -312,7 +312,7 @@ def map_view(request):
         is_approved=True,
         latitude__isnull=False,
         longitude__isnull=False
-    ).values('title','city', 'price', 'property_type', 'status', 'latitude', 'longitude','slug')[:500]
+    ).exclude(status__in=['Vendu','Loué']).values('title','city', 'price', 'property_type', 'status', 'latitude', 'longitude','slug')[:500]
     
     context = {
     'listings_json': json.dumps(list(listings), cls=DjangoJSONEncoder)

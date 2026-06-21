@@ -67,6 +67,7 @@ def register(request):
             user = form.save(commit=False)
             user.email_verified = False
             user.username = generate_username(user.email)
+            user.is_active = False
             user.save()
             send_welcome_email(request,user)
             return render(request,'accounts/created.html')
