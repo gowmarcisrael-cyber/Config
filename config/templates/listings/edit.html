@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load l10n %}
 {% block title %}Publier une annonce — HAVEN{% endblock %}
 
 
@@ -62,8 +63,8 @@
                 
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        const initLat = {{ form.latitude.value|default:'12.3714' }};
-                        const initLng = {{ form.longitude.value|default:'-1.5197' }};
+                        const initLat = {{ form.latitude.value|unlocalize }};
+                        const initLng = {{ form.longitude.value|unlocalize }};
 
                         const map = L.map('map').setView([initLat, initLng], 13);
 
