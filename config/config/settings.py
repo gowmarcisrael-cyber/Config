@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django_browser_reload.middleware.BrowserReloadMiddleware',
     'apps.staff.middleware.StaffMiddleware',
+    'config.middleware.RatelimitMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -199,5 +200,13 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
+
+
+# settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }

@@ -15,6 +15,7 @@ from django.core.mail import send_mail,EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django_ratelimit.decorators import ratelimit
 import re
 import uuid
 # Create your views here.
@@ -58,6 +59,7 @@ def send_welcome_email(request,user):
     email.attach_alternative(html_content, "text/html")
     email.send()
 
+@ratelimit(key='ip',rate='3/m',method='POST',block=True)
 def register(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -75,6 +77,7 @@ def register(request):
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+@ratelimit(key='ip',rate='5/m',method='POST',block=True)
 def activate(request, uid, token):
     try:
         uid = force_str(urlsafe_base64_decode(uid))
@@ -98,6 +101,7 @@ def activate(request, uid, token):
     return HttpResponse(status=404)
 
 
+@ratelimit(key='ip',rate='5/m',method='POST',block=True)
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -133,6 +137,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+@ratelimit(key='ip',rate='6/m',method='POST',block=True)
 @login_required
 def profile(request):
     if request.method == 'POST':

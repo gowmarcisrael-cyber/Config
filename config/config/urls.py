@@ -43,3 +43,5 @@ urlpatterns += [
     path('privacy/', TemplateView.as_view(template_name='page/privacy.html'), name='privacy'),
     path('terms/', TemplateView.as_view(template_name='page/terms.html'), name='terms'),
 ]
+
+handler429 = 'config.views.handler_ratelimit'

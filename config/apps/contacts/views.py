@@ -3,8 +3,10 @@ from .models import Message
 import bleach
 from django.contrib import messages
 from .forms import ContactForm
+from django_ratelimit.decorators import ratelimit
 
 # Create your views here.
+@ratelimit(key='ip',rate='3/m',method='POST',block=True)
 def contact(request):
     if request.method == 'POST':
         # Honeypot - si rempli c'est un bot
