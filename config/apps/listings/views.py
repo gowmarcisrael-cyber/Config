@@ -15,8 +15,12 @@ from datetime import timedelta
 from django.db.models import Count, Q
 from apps.reports.models import Report
 from django.contrib.postgres.search import SearchQuery,SearchVector,SearchRank
+from django.views.decorators.vary import vary_on_cookie
+from django.views.decorators.cache import cache_page
 # Create your views here.
 
+@cache_page(6*60)
+@vary_on_cookie
 def home(request):
     listings = Listing.objects.filter(
         is_available=True,
@@ -290,6 +294,7 @@ def listings_favorite(request):
         }
     return render(request,'dashboard/favorite.html',context=context)
 
+@cache_page(60 * 2)
 def city_autocomplete(request):
     q = request.GET.get('q', '')
     if len(q) < 2:
@@ -306,6 +311,7 @@ def city_autocomplete(request):
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
+@cache_page(60 * 10)
 def map_view(request):
     listings = Listing.objects.filter(
         is_available=True,

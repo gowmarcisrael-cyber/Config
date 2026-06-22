@@ -18,6 +18,7 @@ from django.conf import settings
 from django_ratelimit.decorators import ratelimit
 import re
 import uuid
+from .tasks import send_welcome_email_task,send_delete_confirmation_email
 # Create your views here.
 User = get_user_model()
 
@@ -32,32 +33,8 @@ def generate_username(email):
 
     return username
 
-def send_welcome_email(request,user):
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-    activation_link = request.build_absolute_uri(
-        f"/accounts/activate/{uid}/{token}/"
-    )
-    subject = "Bienvenue sur notre plateforme"
-    html_content = render_to_string(
-        "emails/welcome.html",
-        {
-            "user": user,
-            "activation_link": activation_link,
-        }
-    )
 
-    text_content = f"Activez votre compte ici : {activation_link}"
 
-    email = EmailMultiAlternatives(
-        subject,
-        text_content,
-        settings.EMAIL_HOST_USER,
-        [user.email],
-    )
-
-    email.attach_alternative(html_content, "text/html")
-    email.send()
 
 @ratelimit(key='ip',rate='3/m',method='POST',block=True)
 def register(request):
@@ -69,10 +46,15 @@ def register(request):
             user = form.save(commit=False)
             user.email_verified = False
             user.username = generate_username(user.email)
-            user.is_active = False
             user.save()
-            send_welcome_email(request,user)
-            return render(request,'accounts/created.html')
+
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            activation_link = request.build_absolute_uri(f"/accounts/activate/{uid}/{token}/")
+
+            send_welcome_email_task.delay(user.pk, activation_link)
+
+            return render(request, 'accounts/created.html')
     else:
         form = RegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -237,30 +219,6 @@ def delete_account(request):
     return render(request, 'accounts/partials/delete_email_sent.html')
 
 
-def send_delete_confirmation_email(request, user):
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-    delete_link = request.build_absolute_uri(
-        f"/accounts/delete/{uid}/{token}/"
-    )
-    subject = "Confirmer la suppression de votre compte — HAVEN"
-    html_content = render_to_string(
-        "emails/account_delete_confirmation.html",
-        {
-            "user": user,
-            "delete_link": delete_link,
-        }
-    )
-    text_content = f"Confirmer la suppression : {delete_link}"
-
-    email = EmailMultiAlternatives(
-        subject,
-        text_content,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
 
 def delete_account_confirm(request, uid, token):
     try:
