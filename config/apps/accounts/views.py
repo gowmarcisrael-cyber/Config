@@ -19,6 +19,7 @@ from django_ratelimit.decorators import ratelimit
 import re
 import uuid
 from .tasks import send_welcome_email_task,send_delete_confirmation_email
+from django.core.cache import cache
 # Create your views here.
 User = get_user_model()
 
@@ -120,6 +121,7 @@ def logout_view(request):
 @login_required
 def profile(request):
     if request.method == 'POST':
+        cache.delete(f'dashboard_{request.user.pk}')
         action = request.POST.get('action')
 
         if action == 'avatar':

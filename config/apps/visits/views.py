@@ -11,11 +11,12 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from .tasks import send_visit_status_email,send_visit_request_email
 from django.conf import settings
-
+from django.core.cache import cache
 # Create your views here.
 
 @login_required
 def request_visit(request, slug):
+    cache.delete(f'dashboard_{request.user.pk}')
     listing = get_object_or_404(Listing.objects.select_related('user'), slug=slug)
     
     if listing.user == request.user:
@@ -52,6 +53,7 @@ def request_visit(request, slug):
 
 @login_required
 def visits_sent(request):
+    cache.delete(f'dashboard_{request.user.pk}')
     visits = Visit.objects.filter(
         sender=request.user).select_related(
             'listing',
@@ -67,6 +69,7 @@ def visits_sent(request):
 
 @login_required
 def visits_received(request):
+    cache.delete(f'dashboard_{request.user.pk}')
     visits = Visit.objects.filter(
         receiver=request.user).select_related(
             'listing',
@@ -82,6 +85,7 @@ def visits_received(request):
 @login_required
 @require_POST
 def update_visit_status(request, pk):
+    cache.delete(f'dashboard_{request.user.pk}')
     visit = get_object_or_404(Visit.objects.select_related('listing','sender'),
                               pk=pk, 
                               receiver=request.user)
@@ -112,6 +116,7 @@ def update_visit_status(request, pk):
 @login_required
 @require_POST
 def cancel_visit(request, pk):
+    cache.delete(f'dashboard_{request.user.pk}')
     visit = get_object_or_404(Visit.objects.select_related('listing','sender','receiver'), pk=pk)
     if request.user != visit.sender and request.user != visit.receiver:
         return HttpResponse(status=403)

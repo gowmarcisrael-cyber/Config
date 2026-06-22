@@ -20,19 +20,24 @@ from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+from django_ratelimit.decorators import ratelimit
 # Create your views here.
 
 def home(request):
-    
-    listings = Listing.objects.filter(
-        is_available=True,
-        is_approved=True).exclude(status__in=['Vendu','Loué']).select_related(
-            'user'
-            ).prefetch_related(
-            'images',
-            'likes').only(
-            'id', 'title', 'price', 'city', 'property_type', 'status', 'slug', 'user__id', 'user__username'
-            )[:6]
+    listings = cache.get('home_listings')
+    if listings is None:
+        listings = Listing.objects.filter(
+            is_available=True,
+            is_approved=True).exclude(status__in=['Vendu','Loué']).select_related(
+                'user'
+                ).prefetch_related(
+                'images',
+                'likes').only(
+                'id', 'title', 'price', 'city', 'property_type', 'status', 'slug', 'user__id', 'user__username'
+                )[:6]
+        listings = list(listings)
+
+        cache.set('home_listings',listings,10*60)
 
     context = {
         'listings':listings,
@@ -45,15 +50,24 @@ def search(request):
     listings = Listing.objects.filter(
         is_available=True,
         is_approved=True
-    ).exclude(status__in=['Vendu','Loué']).select_related('user').prefetch_related('likes','images')
+    ).select_related('user').prefetch_related('likes', 'images').only(
+        'id', 'title', 'slug', 'price', 'city', 'property_type', 
+        'status', 'bedrooms', 'bathrooms', 'area',
+        'latitude', 'longitude', 'user__id', 'user__username'
+    )
 
     status = request.GET.get('status')
     city = request.GET.get('city')
     property_type = request.GET.get('property_type')
     price_max = request.GET.get('price_max')
     query = request.GET.get('q')
-    longitude = float(request.GET.get('longitude') or 0)
-    latitude = float(request.GET.get('latitude') or 0)
+
+    try:
+        longitude = float(request.GET.get('longitude') or 0)
+        latitude = float(request.GET.get('latitude') or 0)
+    except (ValueError, TypeError):
+        longitude = 0
+        latitude = 0
 
     if status:
         listings = listings.filter(status=status)
@@ -66,15 +80,12 @@ def search(request):
             listings = listings.filter(price__lte=int(price_max))
         except ValueError:
             pass
-    
+
     if longitude and latitude:
-        try:
-            listings = listings.filter(
-                longitude__range=(longitude - 0.3, longitude + 0.3),
-                latitude__range=(latitude - 0.3, latitude + 0.3),
-            )
-        except (ValueError,TypeError):
-            return HttpResponse(status=400)
+        listings = listings.filter(
+            longitude__range=(longitude - 0.3, longitude + 0.3),
+            latitude__range=(latitude - 0.3, latitude + 0.3),
+        )
 
     if query:
         search_vector = (
@@ -98,6 +109,7 @@ def search(request):
         'statuses': Listing.STATUS[:2],
         'filters': request.GET,
     }
+
     if request.headers.get('HX-Request'):
         return render(request, 'listings/partials/listings_results.html', context)
     return render(request, 'listings/search.html', context)
@@ -122,17 +134,25 @@ def map_recommandation(request):
     })
 
 def detail(request, slug):
-    listing = get_object_or_404(
-        Listing.objects.select_related('user').prefetch_related('likes','images'),
-        slug=slug
-    )
+    listing = cache.get(f'listing-{slug}')
+    if listing is None:
+        listing = get_object_or_404(
+            Listing.objects.select_related('user').prefetch_related('likes', 'images'),
+            slug=slug
+        )
+        cache.set(f'listing-{slug}', listing, 2 * 60)
+
     images = listing.images.all()
-    similars = Listing.objects.filter(
-        property_type=listing.property_type,
-        city=listing.city,
-        is_available=True,
-        is_approved=True,
-        ).exclude(slug=listing.slug).select_related('user').prefetch_related('likes','images')[:4]
+
+    similars = cache.get(f'similars-{slug}')
+    if similars is None:
+        similars = list(Listing.objects.filter(
+            property_type=listing.property_type,
+            city=listing.city,
+            is_available=True,
+            is_approved=True,
+        ).exclude(slug=listing.slug).select_related('user').prefetch_related('likes', 'images')[:4])
+        cache.set(f'similars-{slug}', similars, 2 * 60)
 
     context = {
         'listing': listing,
@@ -143,8 +163,12 @@ def detail(request, slug):
     return render(request, 'listings/details.html', context)
 
 @login_required
+@ratelimit(key='user',rate='3/m',method='POST',block=True)
 def create_listing(request):
     if request.method == 'POST':
+        cache.delete(f'dashboard_{request.user.pk}')
+        cache.delete('home_listings')
+        cache.delete('map_listings_json')
         form = ListingForm(request.POST)
         images = request.FILES.getlist('images')
         if form.is_valid():
@@ -180,26 +204,33 @@ def get_dashboard_context(user):
 
 @login_required
 def dashboard(request):
-    listings = Listing.objects.filter(user=request.user).order_by(
-        '-created_at'
+    cache_key = f'dashboard_{request.user.pk}'
+    context = cache.get(cache_key)
+    
+    if context is None:
+        listings = Listing.objects.filter(user=request.user).order_by(
+            '-created_at'
         ).prefetch_related('images').only(
-            'id', 
-            'title', 
-            'price', 
-            'city', 
-            'property_type', 
-            'status', 
-            'slug',)
-    context = {
-        **get_dashboard_context(request.user),
-        'listings': listings,
-        'active_tab': 'listings',
-    }
+            'id', 'title', 'price', 'city', 
+            'property_type', 'status', 'slug',
+        )
+        context = {
+            **get_dashboard_context(request.user),
+            'listings': list(listings),
+            'active_tab': 'listings',
+        }
+        cache.set(cache_key, context, 2 * 60)
+    
     return render(request, 'dashboard/index.html', context)
 
 @login_required
 @require_POST
 def listing_delete(request,slug):
+    cache.delete(f'listing-{slug}')
+    cache.delete(f'similars-{slug}')
+    cache.delete('home_listings')
+    cache.delete('map_listings_json')
+    cache.delete(f'dashboard_{request.user.pk}')
     listing = get_object_or_404(Listing,slug=slug,user=request.user)
     for img in listing.images.all():
         if img.image and os.path.isfile(img.image.path):
@@ -210,6 +241,8 @@ def listing_delete(request,slug):
 @login_required
 @require_POST
 def listing_change_status(request, slug):
+    cache.delete(f'dashboard_{request.user.pk}')
+    cache.delete(f'listing-{listing.slug}')
     listing = get_object_or_404(Listing, slug=slug, user=request.user)
     new_status = request.POST.get('status')
     if new_status in dict(Listing.STATUS):
@@ -224,6 +257,9 @@ def listing_change_status(request, slug):
 @login_required
 @require_http_methods(['GET', 'POST'])
 def listing_edit(request, slug):
+    cache.delete(f'dashboard_{request.user.pk}')
+    cache.delete(f'listing-{slug}')
+    cache.delete(f'similars-{slug}')
     listing = get_object_or_404(Listing, slug=slug, user=request.user)
     
     if request.method == 'POST':
@@ -260,6 +296,7 @@ def listing_edit(request, slug):
 @login_required
 @require_POST
 def toggle_favorite(request, slug):
+    cache.delete(f'dashboard_{request.user.pk}')
     listing = get_object_or_404(Listing, slug=slug)
 
     if request.user in listing.likes.all():
