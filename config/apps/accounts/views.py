@@ -33,9 +33,6 @@ def generate_username(email):
 
     return username
 
-
-
-
 @ratelimit(key='ip',rate='3/m',method='POST',block=True)
 def register(request):
     if request.user.is_authenticated:
@@ -200,11 +197,6 @@ def profile(request):
 
 
 @login_required
-def delete_account(request):
-    send_delete_confirmation_email(request, request.user)
-    return render(request, 'accounts/delete_account.html')
-
-@login_required
 def delete_confirm(request):
     return render(request, 'accounts/partials/delete_confirm.html')
 
@@ -212,10 +204,16 @@ def delete_confirm(request):
 def delete_cancel(request):
     return render(request, 'accounts/partials/delete_btn.html')
 
+@ratelimit(key='user',rate='3/m',method='POST',block=True)
 @login_required
 @require_POST
 def delete_account(request):
-    send_delete_confirmation_email(request, request.user)
+    uid = urlsafe_base64_encode(force_bytes(request.user.pk))
+    token = default_token_generator.make_token(request.user)
+    delete_link = request.build_absolute_uri(
+        f"/accounts/delete/{uid}/{token}/"
+    )
+    send_delete_confirmation_email.delay(delete_link,request.user.id)
     return render(request, 'accounts/partials/delete_email_sent.html')
 
 

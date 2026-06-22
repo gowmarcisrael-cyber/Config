@@ -9,57 +9,10 @@ from django.contrib import messages
 from apps.notifications.views import notify
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from .tasks import send_visit_status_email,send_visit_request_email
 from django.conf import settings
 
 # Create your views here.
-def send_visit_request_email(request, visit):
-    subject = f"Nouvelle demande de visite — {visit.listing.title}"
-    html_content = render_to_string(
-        "emails/visit_request.html",
-        {
-            "sender": visit.sender.username,
-            "listing": visit.listing,
-            "date": visit.date,
-            "message": visit.message,
-            "listing_url": request.build_absolute_uri(f"/detail/{visit.listing.slug}/"),
-        }
-    )
-    text_content = f"Nouvelle demande de visite de {visit.sender.username} pour {visit.listing.title}"
-
-    email = EmailMultiAlternatives(
-        subject,
-        text_content,
-        settings.DEFAULT_FROM_EMAIL,
-        [visit.receiver.email]
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-
-def send_visit_status_email(request, visit):
-    subject = f"Demande de visite {visit.status} — {visit.listing.title}"
-    html_content = render_to_string(
-        "emails/visit_status_update.html",
-        {
-            "sender": visit.sender.username,
-            "receiver": visit.receiver.username,
-            "listing": visit.listing,
-            "date": visit.date,
-            "message": visit.message,
-            "status": visit.status,
-            "listing_url": request.build_absolute_uri(f"/detail/{visit.listing.slug}/"),
-        }
-    )
-    text_content = f"Votre demande de visite pour {visit.listing.title} a été {visit.status}."
-
-    email = EmailMultiAlternatives(
-        subject,
-        text_content,
-        settings.DEFAULT_FROM_EMAIL,
-        [visit.sender.email]
-    )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
-
 
 @login_required
 def request_visit(request, slug):
@@ -85,7 +38,8 @@ def request_visit(request, slug):
             visit.sender = request.user
             visit.receiver = listing.user
             visit.save()
-            send_visit_request_email(request,visit)
+            listing_url = request.build_absolute_uri(f"/detail/{visit.listing.slug}/")
+            send_visit_request_email.delay(visit.id,listing_url)
             return redirect('listing_detail', slug=slug)
     else:
         form = VisitForm()
@@ -151,7 +105,8 @@ def update_visit_status(request, pk):
                 message=f'Votre demande de visite pour "{visit.listing.title}" a été refusée.',
                 link=f'/detail/{visit.listing.slug}/'
             )
-        send_visit_status_email(request,visit)
+        listing_url = request.build_absolute_uri(f"/detail/{visit.listing.slug}/")
+        send_visit_status_email.delay(visit.id,listing_url)
     return render(request, 'visits/partials/visit_status.html', {'visit': visit})
 
 @login_required

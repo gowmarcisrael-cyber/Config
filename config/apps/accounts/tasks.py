@@ -7,7 +7,12 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
-@shared_task
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={'max_retries': 3},
+    retry_backoff=True
+)
 def send_welcome_email_task(user_id, activation_link):
     User = get_user_model()
     try:
@@ -28,12 +33,17 @@ def send_welcome_email_task(user_id, activation_link):
     email.attach_alternative(html_content, "text/html")
     email.send()
 
-def send_delete_confirmation_email(request, user):
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-    delete_link = request.build_absolute_uri(
-        f"/accounts/delete/{uid}/{token}/"
-    )
+@shared_task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_kwargs={'max_retries': 3},
+    retry_backoff=True
+)
+def send_delete_confirmation_email(delete_link, user_id):
+    try:
+        user = get_user_model().objects.get(pk=user_id)
+    except get_user_model().DoesNotExist:
+        return
     subject = "Confirmer la suppression de votre compte — HAVEN"
     html_content = render_to_string(
         "emails/account_delete_confirmation.html",

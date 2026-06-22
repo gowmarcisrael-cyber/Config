@@ -17,11 +17,13 @@ from apps.reports.models import Report
 from django.contrib.postgres.search import SearchQuery,SearchVector,SearchRank
 from django.views.decorators.vary import vary_on_cookie
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 # Create your views here.
 
-@cache_page(6*60)
-@vary_on_cookie
 def home(request):
+    
     listings = Listing.objects.filter(
         is_available=True,
         is_approved=True).exclude(status__in=['Vendu','Loué']).select_related(
@@ -31,6 +33,7 @@ def home(request):
             'likes').only(
             'id', 'title', 'price', 'city', 'property_type', 'status', 'slug', 'user__id', 'user__username'
             )[:6]
+
     context = {
         'listings':listings,
         'types':Listing.TYPES,
@@ -308,19 +311,46 @@ def city_autocomplete(request):
     
     return JsonResponse(list(cities), safe=False)
 
-from django.core.serializers.json import DjangoJSONEncoder
-import json
 
-@cache_page(60 * 10)
 def map_view(request):
-    listings = Listing.objects.filter(
-        is_available=True,
-        is_approved=True,
-        latitude__isnull=False,
-        longitude__isnull=False
-    ).exclude(status__in=['Vendu','Loué']).values('title','city', 'price', 'property_type', 'status', 'latitude', 'longitude','slug')[:500]
-    
-    context = {
-    'listings_json': json.dumps(list(listings), cls=DjangoJSONEncoder)
-    }
-    return render(request, 'listings/map.html', context)
+    listings_json = cache.get("map_listings_json")
+
+    if listings_json is None:
+        listings = list(
+            Listing.objects.filter(
+                is_available=True,
+                is_approved=True,
+                latitude__isnull=False,
+                longitude__isnull=False,
+            )
+            .exclude(status__in=["Vendu", "Loué"])
+            .values(
+                "title",
+                "city",
+                "price",
+                "property_type",
+                "status",
+                "latitude",
+                "longitude",
+                "slug",
+            )[:500]
+        )
+
+        listings_json = json.dumps(
+            listings,
+            cls=DjangoJSONEncoder
+        )
+
+        cache.set(
+            "map_listings_json",
+            listings_json,
+            60 * 10  # 10 minutes
+        )
+
+    return render(
+        request,
+        "listings/map.html",
+        {
+            "listings_json": listings_json
+        }
+    )

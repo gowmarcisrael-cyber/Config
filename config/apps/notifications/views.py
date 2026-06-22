@@ -13,8 +13,6 @@ def notify(user, notif_type, message, link=''):
         link=link,
     )
 
-
-
 @login_required
 def notifications_list(request):
     notifications = Notification.objects.filter(user=request.user)

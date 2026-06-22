@@ -213,11 +213,6 @@ CACHES = {
     }
 }
 
-# Retire les anciennes lignes
-# ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_UNIQUE_EMAIL = True
-
-# Nouvelle syntaxe
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 
