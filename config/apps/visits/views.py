@@ -64,7 +64,10 @@ def visits_sent(request):
             'message',
             'listing_id',
             'receiver_id',)
-    return render(request, 'visits/sent.html', {'visits': visits})
+    context = {'visits': visits}
+    if request.headers.get('HX-Request'):
+        return render(request, 'visits/sent_fragment.html', context)
+    return render(request, 'visits/sent.html', context=context)
 
 
 @login_required
@@ -80,7 +83,10 @@ def visits_received(request):
             'message',
             'listing_id',
             'sender_id',)
-    return render(request, 'visits/received.html', {'visits': visits})
+    context = {'visits': visits}
+    if request.headers.get('HX-request'):
+        return render(request, 'visits/received_fragment.html',context=context)
+    return render(request, 'visits/received.html', context=context)
 
 @login_required
 @require_POST

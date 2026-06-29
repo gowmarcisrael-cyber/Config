@@ -1,0 +1,23 @@
+<div class="max-w-2xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-slate-800">Notifications</h1>
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-1 text-sm text-orange-500 hover:underline">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Tableau de bord
+        </a>
+    </div>
+
+    <div class="space-y-3">
+        {% for notification in notifications %}
+        <c-notif-card :notification="notification"></c-notif-card>
+        {% empty %}
+        <div class="text-center py-16 text-gray-400">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="bell" class="w-8 h-8 text-gray-300"></i>
+            </div>
+            <p class="text-sm">Aucune notification.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>

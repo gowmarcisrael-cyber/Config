@@ -31,28 +31,6 @@
 </div>
 
 <!-- Liste annonces -->
-<div class="bg-white border border-[#f0f0ee] rounded-xl overflow-hidden">
-    <div class="px-5 py-4 border-b border-[#f8f7f4] flex items-center justify-between">
-        <p class="text-sm font-bold text-[#18181b]">Mes annonces</p>
-        <a href="{% url 'create-listing' %}"
-           class="text-xs font-semibold text-orange-500 border border-orange-200 bg-orange-50 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors">
-            + Nouvelle
-        </a>
-    </div>
-
-    <div id="listings-list" class="divide-y divide-[#f8f7f4]">
-        {% for listing in listings %}
-            {% include 'dashboard/partials/listing_row.html' %}
-        {% empty %}
-        <div class="text-center py-16 text-gray-400">
-            <p class="text-4xl mb-3">🏠</p>
-            <p class="text-sm">Vous n'avez pas encore d'annonces.</p>
-            <a href="{% url 'create-listing' %}" class="text-orange-500 font-medium hover:underline text-sm mt-2 inline-block">
-                Publier maintenant
-            </a>
-        </div>
-        {% endfor %}
-    </div>
-</div>
+{% include 'dashboard/listings.html' %}
 
 {% endblock %}

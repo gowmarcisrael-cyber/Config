@@ -1,0 +1,20 @@
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Favoris</h1>
+            <p class="text-sm text-gray-400 mt-1">Bienvenue, {{ request.user.username }}</p>
+        </div>
+    </div>
+
+    <!-- Liste annonces -->
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for listing in listings %}
+        <c-card :listing="listing"></c-card>
+        {% empty %}
+        <div class="col-span-3 text-center py-16 text-gray-400">Aucune annonce disponible.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>

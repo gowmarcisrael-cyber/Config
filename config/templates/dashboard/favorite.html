@@ -12,13 +12,6 @@
         </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="flex gap-6 border-b border-gray-100 mb-8 text-sm font-medium">
-        <button class="pb-3 text-gray-400 hover:text-gray-600"><a href="{% url 'dashboard' %}">Mes annonces</a></button>
-        <button class="pb-3 text-gray-400 hover:text-gray-600"><a href="{% url 'profile' %}">Profil</a></button>
-        <button class="pb-3 text-orange-500 border-b-2 border-orange-500"><a href="{% url 'favorite' %}">favoris</a></button>
-    </div>
-
     <!-- Liste annonces -->
      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for listing in listings %}

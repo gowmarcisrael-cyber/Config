@@ -18,7 +18,10 @@ def notifications_list(request):
     notifications = Notification.objects.filter(user=request.user)
     # Marquer toutes comme lues
     notifications.filter(is_read=False).update(is_read=True)
-    return render(request, 'notifications/list.html', {'notifications': notifications})
+    context = {'notifications': notifications}
+    if request.headers.get('HX-Request'):
+        return render(request, 'notifications/list_fragment.html', context)
+    return render(request, 'notifications/list.html',context=context)
 
 
 @login_required

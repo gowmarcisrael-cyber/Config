@@ -1,0 +1,42 @@
+<div id="dashboard-content" class="bg-white border border-[#f0f0ee] rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-[#f8f7f4] flex items-center justify-between">
+        <p class="text-sm font-bold text-[#18181b]">Mes annonces</p>
+        <a href="{% url 'create-listing' %}"
+            class="text-xs font-semibold text-orange-500 border border-orange-200 bg-orange-50 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors">
+            + Nouvelle
+        </a>
+    </div>
+
+    <div id="listings-list" class="divide-y divide-[#f8f7f4]">
+        {% for listing in listings %}
+        {% include 'dashboard/partials/listing_row.html' %}
+        {% empty %}
+        <div class="flex flex-col items-center justify-center text-center py-16 px-4 max-w-sm mx-auto">
+
+            <div
+                class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-4 shadow-sm shadow-slate-100/50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-800 tracking-tight">Aucune annonce trouvée</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-[240px] leading-relaxed">
+                Vous n'avez pas encore publié d'annonces. Commencez dès maintenant à proposer votre bien !
+            </p>
+
+            <a href="{% url 'create-listing' %}"
+                class="inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md shadow-orange-500/10 mt-5 transition-all active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" x2="12" y1="5" y2="19" />
+                    <line x1="5" x2="19" y1="12" y2="12" />
+                </svg>
+                <span>Publier maintenant</span>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>

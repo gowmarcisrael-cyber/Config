@@ -192,10 +192,11 @@ def profile(request):
             
             request.user.save()
             messages.success(request, 'Profil mis à jour.')
-
         return redirect('profile')
-
-    return render(request, 'accounts/profile/profile.html', {'user': request.user})
+    context = {'user': request.user}
+    if request.headers.get('HX-Request'):
+        return render(request, 'accounts/profile/profile_fragment.html', context=context)
+    return render(request, 'accounts/profile/profile.html', context=context)
 
 
 @login_required

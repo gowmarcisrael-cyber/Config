@@ -1,71 +1,96 @@
 {% load listing_tags %}
 {% load static %}
-<div
-    class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full sm:w-[300px] mx-auto">
+<div class="bg-white rounded-2xl overflow-hidden border border-slate-100 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-100/50 transition-all duration-300 w-full sm:w-[300px] mx-auto group">
 
     <!-- Image EN HAUT -->
-    <div class="relative h-48 bg-gray-100">
+    <div class="relative h-48 bg-slate-50 overflow-hidden">
         {% if listing.get_first_image %}
-        <img src="{{ listing.get_first_image }}" alt="{{ listing.title }}" class="w-full h-full object-cover">
+            <img src="{{ listing.get_first_image }}" alt="{{ listing.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
         {% else %}
-        <div class="w-full h-full flex items-center justify-center text-5xl">🏠</div>
+            <div class="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                <!-- Lucide: home -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
         {% endif %}
 
-        <!-- Prix sur l'image -->
-        <div
-            class="absolute bottom-2 left-2 bg-slate-900 bg-opacity-80 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
-            {{ listing.price|floatformat:0 }} FCFA
-        </div>
-
-        <!-- Badge statut -->
-        <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
-            {% if listing.status == 'A louer' %}bg-green-100 text-green-800
-            {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
-            {% else %}bg-gray-100 text-gray-600{% endif %}">
+        <!-- Badge statut (En haut à gauche) -->
+        <span class="absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md border shadow-sm
+            {% if listing.status == 'A louer' %}bg-emerald-50/90 text-emerald-700 border-emerald-200/50
+            {% elif listing.status == 'En vente' %}bg-sky-50/90 text-sky-700 border-sky-200/50
+            {% else %}bg-slate-50/90 text-slate-600 border-slate-200/50{% endif %}">
             {{ listing.status }}
         </span>
 
+        <!-- Bouton Favoris (En haut à droite) -->
         {% if request.user.is_authenticated %}
-        <div class="absolute top-2 right-2">
+        <div class="absolute top-3 right-3 z-10">
             {% is_favorited request.user listing as is_fav %}
             {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
         </div>
         {% endif %}
+
+        <!-- Prix (En bas à gauche, mieux intégré) -->
+        <div class="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-sm text-white text-xs font-extrabold px-3 py-1.5 rounded-xl tracking-wide shadow-sm">
+            {{ listing.price|floatformat:0 }} FCFA
+        </div>
     </div>
 
     <!-- Contenu EN BAS -->
     <div class="p-4">
-        <div class="flex items-center justify-between mb-1">
-            <div class="flex items-center gap-1 text-xs text-gray-400 font-medium">
-                <img src="{% static 'images/gps.png' %}" alt="" class="w-3.5 h-3.5">
-                <span>{{ listing.city }}</span>
+        <!-- Ville & Type de bien -->
+        <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-1 text-[11px] text-slate-400 font-semibold min-w-0">
+                <!-- Lucide: map-pin -->
+                <svg class="text-slate-400 shrink-0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span class="truncate">{{ listing.city }}</span>
             </div>
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">
-                {{ listing.property_type }}</span>
+            <span class="text-[10px] bg-slate-50 border border-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-bold tracking-wide uppercase flex-shrink-0">
+                {{ listing.property_type }}
+            </span>
         </div>
-        <h3 class="font-bold text-slate-800 text-sm mb-2 truncate">{{ listing.title }}</h3>
-        <p class="text-xs text-gray-400 mb-3 line-clamp-2">{{ listing.description }}</p>
-        <div class="flex items-center justify-between border-t border-gray-50 pt-3">
-            <div class="flex gap-3 text-xs text-gray-400">
+
+        <!-- Titre & Description -->
+        <h3 class="font-bold text-slate-800 text-sm mb-1 truncate group-hover:text-orange-500 transition-colors tracking-tight">
+            {{ listing.title }}
+        </h3>
+        <p class="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed min-h-[32px]">
+            {{ listing.description }}
+        </p>
+
+        <!-- Caractéristiques & Action -->
+        <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+            <div class="flex items-center gap-2.5 text-[11px] font-bold text-slate-400">
                 {% if listing.bedrooms %}
-                <span class="flex items-center gap-1">
-                    <i data-lucide="bed" class="w-3 h-3"></i> {{ listing.bedrooms }}
+                <span class="flex items-center gap-1" title="{{ listing.bedrooms }} chambres">
+                    <!-- Lucide: bed -->
+                    <svg class="text-slate-400/80" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 14h20"/><path d="M6 8v4"/></svg>
+                    <span class="text-slate-500">{{ listing.bedrooms }}</span>
                 </span>
                 {% endif %}
+
                 {% if listing.bathrooms %}
-                <span class="flex items-center gap-1">
-                    <i data-lucide="shower-head" class="w-3 h-3"></i> {{ listing.bathrooms }}
+                <span class="flex items-center gap-1" title="{{ listing.bathrooms }} salles de bain">
+                    <!-- Lucide: shower-head -->
+                    <svg class="text-slate-400/80" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5h6"/><path d="M15 9h6"/><path d="M19 5v4"/><path d="M8 14v.01"/><path d="M12 14v.01"/><path d="M10 16v.01"/><path d="M14 16v.01"/><path d="M8 18v.01"/><path d="M12 18v.01"/></svg>
+                    <span class="text-slate-500">{{ listing.bathrooms }}</span>
                 </span>
                 {% endif %}
+
                 {% if listing.area %}
-                <span class="flex items-center gap-1">
-                    <i data-lucide="ruler" class="w-3 h-3"></i> {{ listing.area }}m²
+                <span class="flex items-center gap-1" title="Superficie">
+                    <!-- Lucide: ruler -->
+                    <svg class="text-slate-400/80" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/><path d="M12 7h4"/><path d="M10 11h6"/><path d="M8 15h8"/><path d="M14 19h2"/><path d="m22 22-5-5"/></svg>
+                    <span class="text-slate-500">{{ listing.area }}m²</span>
                 </span>
                 {% endif %}
             </div>
+
+            <!-- Bouton Voir -->
             <a href="{% url 'listing_detail' listing.slug %}"
-                class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
-                Voir →
+                class="inline-flex items-center gap-0.5 text-xs font-bold text-orange-500 bg-orange-500/5 border border-orange-200/60 px-3 py-1.5 rounded-xl hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-200">
+                <span>Voir</span>
+                <!-- Lucide: chevron-right -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
         </div>
     </div>

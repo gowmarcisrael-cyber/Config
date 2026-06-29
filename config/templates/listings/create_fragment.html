@@ -1,0 +1,255 @@
+{% load static %}
+<div class="max-w-2xl mx-auto px-6 py-10">
+
+    <h1 class="text-2xl font-bold text-slate-800 mb-2">Publier une annonce</h1>
+    <p class="text-sm text-gray-400 mb-8">Remplissez les informations de votre bien</p>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="q">
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Informations générales</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Titre</label>
+                <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if form.title.errors %}<p class="text-xs text-red-500 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Type de bien</label>
+                    <select name="property_type" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        {% for value, label in form.fields.property_type.choices %}
+                        <option value="{{ value }}" {% if form.property_type.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.property_type.errors %}<p class="text-xs text-red-500 mt-1">{{ form.property_type.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Statut</label>
+                    <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        {% for value, label in form.fields.status.choices %}
+                        <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.status.errors %}<p class="text-xs text-red-500 mt-1">{{ form.status.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Description</label>
+                <textarea name="description" rows="4"
+                          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}<p class="text-xs text-red-500 mt-1">{{ form.description.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Localisation</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Ville</label>
+                <input type="text" name="city" value="{{ form.city.value|default:'' }}"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                {% if form.city.errors %}<p class="text-xs text-red-500 mt-1">{{ form.city.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="space-y-3">
+    <label class="block text-sm font-bold text-slate-700">
+        Positionnez votre bien sur la carte
+        <span class="text-slate-400 font-normal text-xs ml-1">— cliquez pour placer le marqueur</span>
+    </label>
+    
+    <div id="map" class="z-0 w-full h-64 rounded-2xl border border-slate-200 shadow-inner"></div>
+    
+    <button type="button" id="geolocate"
+        class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2.5 px-4 rounded-xl transition-colors group cursor-pointer">
+        <svg id="geolocate-icon" class="text-slate-500 transition-transform group-hover:scale-110" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" x2="12" y1="1" y2="4"/><line x1="12" x2="12" y1="20" y2="23"/><line x1="20" x2="23" y1="12" y2="12"/><line x1="1" x2="4" y1="12" y2="12"/></svg>
+        <span id="geolocate-text">Me localiser</span>
+    </button>
+
+    <script>
+        (function() {
+            // Fonction principale d'initialisation de la carte
+            function initMap() {
+                const mapEl = document.getElementById('map');
+                if (!mapEl || mapEl.classList.contains('leaflet-container')) return;
+
+                const initLat = {{ form.latitude.value|default:'12.3714' }};
+                const initLng = {{ form.longitude.value|default:'-1.5197' }};
+
+                const map = L.map('map').setView([initLat, initLng], 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                let marker = null;
+
+                function updateCoords(e) {
+                    const pos = e.target.getLatLng();
+                    const lat = pos.lat.toFixed(6);
+                    const lng = pos.lng.toFixed(6);
+                    
+                    const latInput = document.getElementById('latitude');
+                    const lngInput = document.getElementById('longitude');
+                    const display = document.getElementById('coords-display');
+                    
+                    if (latInput) latInput.value = lat;
+                    if (lngInput) lngInput.value = lng;
+                    if (display) display.textContent = `📍 ${lat}, ${lng}`;
+                }
+
+                // Placement initial si coordonnées déjà enregistrées (Ex: Édition)
+                {% if form.latitude.value and form.longitude.value %}
+                marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+                marker.on('dragend', updateCoords);
+                {% endif %}
+
+                // Clic sur la carte pour poser/déplacer le marqueur
+                map.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        marker.on('dragend', updateCoords);
+                    }
+                    updateCoords({ target: marker });
+                });
+
+                // Gestionnaire du bouton de géolocalisation
+                const geoBtn = document.getElementById('geolocate');
+                if (geoBtn) {
+                    geoBtn.addEventListener('click', function() {
+                        if (!navigator.geolocation) {
+                            alert("La géolocalisation n'est pas supportée par votre navigateur.");
+                            return;
+                        }
+
+                        const textEl = document.getElementById('geolocate-text');
+                        const iconEl = document.getElementById('geolocate-icon');
+                        
+                        textEl.textContent = 'Localisation...';
+                        geoBtn.disabled = true;
+                        iconEl.classList.add('animate-spin');
+
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const lat = position.coords.latitude;
+                                const lng = position.coords.longitude;
+
+                                map.setView([lat, lng], 16);
+
+                                if (marker) {
+                                    marker.setLatLng([lat, lng]);
+                                } else {
+                                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                    marker.on('dragend', updateCoords);
+                                }
+
+                                const latInput = document.getElementById('latitude');
+                                const lngInput = document.getElementById('longitude');
+                                const display = document.getElementById('coords-display');
+
+                                if (latInput) latInput.value = lat.toFixed(6);
+                                if (lngInput) lngInput.value = lng.toFixed(6);
+                                if (display) display.textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+                                textEl.textContent = 'Me localiser';
+                                geoBtn.disabled = false;
+                                iconEl.classList.remove('animate-spin');
+                            },
+                            (error) => {
+                                alert('Impossible de vous localiser. Vérifiez les permissions.');
+                                textEl.textContent = 'Me localiser';
+                                geoBtn.disabled = false;
+                                iconEl.classList.remove('animate-spin');
+                            }
+                        );
+                    });
+                }
+            }
+
+            // Exécution immédiate (pour le premier chargement ou chargement standard)
+            initMap();
+            
+            // Support HTMX SPA : Ré-initialise la carte si injectée via AJAX
+            document.body.addEventListener('htmx:afterSwap', function(e) {
+                if (e.detail.target.id === 'dashboard-main-content' || e.detail.target.contains(document.getElementById('map'))) {
+                    initMap();
+                }
+            });
+        })();
+    </script>
+</div>
+
+            <input type="hidden" name="latitude" id="latitude" value="{{ form.latitude.value|default:'' }}">
+            <input type="hidden" name="longitude" id="longitude" value="{{ form.longitude.value|default:'' }}">
+            {% if form.latitude.errors %}<p class="text-xs text-red-500 mt-1">La position sur la carte est requise.</p>{% endif %}
+
+            <p id="coords-display" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg w-max">
+                {% if form.latitude.value and form.longitude.value %}
+                    <svg class="text-slate-400 shrink-0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ form.latitude.value|floatformat:6 }}, {{ form.longitude.value|floatformat:6 }}</span>
+                {% else %}
+                    <svg class="text-slate-300 shrink-0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span class="italic text-slate-400/80">Aucune position sélectionnée</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Caractéristiques</h2>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Prix (FCFA)</label>
+                    <input type="number" name="price" value="{{ form.price.value|default:'' }}"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.price.errors %}<p class="text-xs text-red-500 mt-1">{{ form.price.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Superficie (m²)</label>
+                    <input type="number" name="area" value="{{ form.area.value|default:'' }}"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.area.errors %}<p class="text-xs text-red-500 mt-1">{{ form.area.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Chambres</label>
+                    <input type="number" name="bedrooms" value="{{ form.bedrooms.value|default:'' }}"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.bedrooms.errors %}<p class="text-xs text-red-500 mt-1">{{ form.bedrooms.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Salles de bain</label>
+                    <input type="number" name="bathrooms" value="{{ form.bathrooms.value|default:'' }}"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {% if form.bathrooms.errors %}<p class="text-xs text-red-500 mt-1">{{ form.bathrooms.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-2xl p-6">
+            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Photos</h2>
+            <label id="dropZone" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-10 cursor-pointer hover:border-orange-400 transition-colors">
+                <span class="text-3xl mb-2">📷</span>
+                <span class="text-sm font-medium text-gray-600">Cliquez pour ajouter des photos</span>
+                <span class="text-xs text-gray-400 mt-1">JPG, PNG — plusieurs fichiers acceptés</span>
+                <input type="file" name="images" multiple accept="image/*" class="hidden" id="fileInput"
+                       onchange="previewImages(this)">
+            </label>
+            <div id="preview" class="flex flex-wrap gap-2 mt-3"></div>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+            Publier l'annonce
+        </button>
+
+    </form>
+</div>
+<script src="{% static 'js/fileInput.js' %}"></script>

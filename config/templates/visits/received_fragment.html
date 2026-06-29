@@ -1,0 +1,23 @@
+<!-- Header -->
+<div class="flex items-center justify-between mb-6">
+    <p class="text-xs text-gray-400">{{ visits|length }} demande{{ visits|length|pluralize }} reçue{{ visits|length|pluralize }}</p>
+</div>
+
+<!-- Liste -->
+<div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm shadow-slate-100/40">
+    {% for visit in visits %}
+        <c-visit-card :visit="visit"></c-visit-card>
+    {% empty %}
+        <div class="flex flex-col items-center justify-center text-center py-16 px-4 max-w-sm mx-auto">
+            
+            <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 mb-4 shadow-sm shadow-slate-100/50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-800 tracking-tight">Boîte de réception vide</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-[240px] leading-relaxed">
+                Aucune demande de visite n'a encore été reçue pour le moment.
+            </p>
+        </div>
+    {% endfor %}
+</div>

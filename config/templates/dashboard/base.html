@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Mon espace — HAVEN{% endblock %}</title>
+    <title id="page-title-seo">{% block title %}Mon espace — HAVEN{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-[#f8f7f4] font-sans">
@@ -14,43 +17,46 @@
 
     <c-dashboard-aside></c-dashboard-aside>
 
-    <!-- Main -->
     <div class="flex-1 flex flex-col overflow-hidden md:ml-0">
 
-        <!-- Topbar -->
         <header class="bg-white border-b border-[#f0f0ee] px-4 h-12 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-3">
-                <!-- Hamburger -->
                 <button @click="open = true"
                         class="md:hidden text-gray-500 hover:text-gray-700 text-xl leading-none">
                     ☰
                 </button>
-                <div>
+                
+                <div id="dashboard-header-titles">
                     <h1 class="text-sm font-bold text-[#18181b]">{% block page_title %}Tableau de bord{% endblock %}</h1>
                     <p class="text-xs text-gray-400 hidden md:block">{% block page_subtitle %}Bienvenue, {{ request.user.username }}{% endblock %}</p>
                 </div>
             </div>
-            <a href="{% url 'notifications_list' %}" class="relative inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors group" title="Notifications">
-    <!-- Lucide: bell -->
-    <svg class="transition-colors group-hover:text-slate-600" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-    
-    {% if unread_notifications %}
-    <!-- Badge rouge -->
-    <span class="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] px-1 bg-red-500 rounded-full text-white text-[9px] font-extrabold flex items-center justify-center border border-white ring-1 ring-red-500/10">
-        {{ unread_notifications }}
-    </span>
-    {% endif %}
-</a>
+            
+            <a href="{% url 'notifications_list' %}" 
+               hx-get="{% url 'notifications_list' %}"
+               hx-target="#dashboard-main-content"
+               hx-push-url="true"
+               class="relative inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors group" title="Notifications">
+                <svg class="transition-colors group-hover:text-slate-600" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                
+                {% if unread_notifications %}
+                <span class="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] px-1 bg-red-500 rounded-full text-white text-[9px] font-extrabold flex items-center justify-center border border-white ring-1 ring-red-500/10">
+                    {{ unread_notifications }}
+                </span>
+                {% endif %}
+            </a>
         </header>
 
-        <!-- Content -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-6">
+        <main id="dashboard-main-content" class="flex-1 overflow-y-auto p-4 md:p-6">
+            
             {% if messages %}
-            {% for message in messages %}
-            <div class="{% if message.tags == 'error' %}bg-red-50 text-red-600{% else %}bg-green-50 text-green-700{% endif %} text-sm rounded-xl px-4 py-3 mb-5">
-                {{ message }}
+            <div id="django-messages">
+                {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-50 text-red-600{% else %}bg-green-50 text-green-700{% endif %} text-sm rounded-xl px-4 py-3 mb-5">
+                    {{ message }}
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
             {% endif %}
 
             {% block content %}{% endblock %}
@@ -62,6 +68,7 @@
 
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 <script>
+    // Configuration globale pour joindre automatiquement le jeton CSRF Django à toutes les requêtes HTMX
     document.body.addEventListener('htmx:configRequest', (e) => {
         e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
     });

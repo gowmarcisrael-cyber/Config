@@ -182,6 +182,8 @@ def create_listing(request):
             print('erreur',form.errors)
     else:
         form = ListingForm()
+    if request.headers.get('HX-request'):
+        return render(request,'listings/create_fragment.html',{'form':form})
     return render(request, 'listings/create.html', {'form': form})
 
 
@@ -220,7 +222,8 @@ def dashboard(request):
             'active_tab': 'listings',
         }
         cache.set(cache_key, context, 2 * 60)
-    
+    if request.headers.get('HX-Request'):
+        return render(request, 'dashboard/listings.html', context)
     return render(request, 'dashboard/index.html', context)
 
 @login_required
@@ -332,6 +335,8 @@ def listings_favorite(request):
     context = {
         'listings': listings
         }
+    if request.headers.get('HX-request'):
+        return render(request,'dashboard/favorite_fragment.html',context=context)
     return render(request,'dashboard/favorite.html',context=context)
 
 @cache_page(60 * 2)

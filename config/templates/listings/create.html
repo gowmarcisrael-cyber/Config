@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base.html' %}
 {% load static %}
 {% block title %}Publier une annonce — HAVEN{% endblock %}
 
@@ -61,110 +61,148 @@
                 {% if form.city.errors %}<p class="text-xs text-red-500 mt-1">{{ form.city.errors.0 }}</p>{% endif %}
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-600 mb-2">
-                    Positionnez votre bien sur la carte
-                    <span class="text-gray-400 font-normal text-xs ml-1">— cliquez pour placer le marqueur</span>
-                </label>
-                
-                <div id="map" class="z-0 w-full h-64 rounded-xl border border-gray-200 mb-3"></div>
-                
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const initLat = {{ form.latitude.value|default:'12.3714' }};
-                        const initLng = {{ form.longitude.value|default:'-1.5197' }};
+            <div class="space-y-3">
+    <label class="block text-sm font-bold text-slate-700">
+        Positionnez votre bien sur la carte
+        <span class="text-slate-400 font-normal text-xs ml-1">— cliquez pour placer le marqueur</span>
+    </label>
+    
+    <div id="map" class="z-0 w-full h-64 rounded-2xl border border-slate-200 shadow-inner"></div>
+    
+    <button type="button" id="geolocate"
+        class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2.5 px-4 rounded-xl transition-colors group cursor-pointer">
+        <svg id="geolocate-icon" class="text-slate-500 transition-transform group-hover:scale-110" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" x2="12" y1="1" y2="4"/><line x1="12" x2="12" y1="20" y2="23"/><line x1="20" x2="23" y1="12" y2="12"/><line x1="1" x2="4" y1="12" y2="12"/></svg>
+        <span id="geolocate-text">Me localiser</span>
+    </button>
 
-                        const map = L.map('map').setView([initLat, initLng], 13);
+    <script>
+        (function() {
+            // Fonction principale d'initialisation de la carte
+            function initMap() {
+                const mapEl = document.getElementById('map');
+                if (!mapEl || mapEl.classList.contains('leaflet-container')) return;
 
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap'
-                        }).addTo(map);
+                const initLat = {{ form.latitude.value|default:'12.3714' }};
+                const initLng = {{ form.longitude.value|default:'-1.5197' }};
 
-                        let marker = null;
+                const map = L.map('map').setView([initLat, initLng], 13);
 
-                        // CORRECTION JS : Fonction déplacée en haut du scope
-                        function updateCoords(e) {
-                            const pos = e.target.getLatLng();
-                            const lat = pos.lat.toFixed(6);
-                            const lng = pos.lng.toFixed(6);
-                            document.getElementById('latitude').value = lat;
-                            document.getElementById('longitude').value = lng;
-                            document.getElementById('coords-display').textContent = `📍 ${lat}, ${lng}`;
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                let marker = null;
+
+                function updateCoords(e) {
+                    const pos = e.target.getLatLng();
+                    const lat = pos.lat.toFixed(6);
+                    const lng = pos.lng.toFixed(6);
+                    
+                    const latInput = document.getElementById('latitude');
+                    const lngInput = document.getElementById('longitude');
+                    const display = document.getElementById('coords-display');
+                    
+                    if (latInput) latInput.value = lat;
+                    if (lngInput) lngInput.value = lng;
+                    if (display) display.textContent = `📍 ${lat}, ${lng}`;
+                }
+
+                // Placement initial si coordonnées déjà enregistrées (Ex: Édition)
+                {% if form.latitude.value and form.longitude.value %}
+                marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+                marker.on('dragend', updateCoords);
+                {% endif %}
+
+                // Clic sur la carte pour poser/déplacer le marqueur
+                map.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        marker.on('dragend', updateCoords);
+                    }
+                    updateCoords({ target: marker });
+                });
+
+                // Gestionnaire du bouton de géolocalisation
+                const geoBtn = document.getElementById('geolocate');
+                if (geoBtn) {
+                    geoBtn.addEventListener('click', function() {
+                        if (!navigator.geolocation) {
+                            alert("La géolocalisation n'est pas supportée par votre navigateur.");
+                            return;
                         }
 
-                        // Si coordonnées existantes, place le marker
-                        {% if form.latitude.value and form.longitude.value %}
-                        marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
-                        marker.on('dragend', updateCoords);
-                        {% endif %}
+                        const textEl = document.getElementById('geolocate-text');
+                        const iconEl = document.getElementById('geolocate-icon');
+                        
+                        textEl.textContent = 'Localisation...';
+                        geoBtn.disabled = true;
+                        iconEl.classList.add('animate-spin');
 
-                        map.on('click', function(e) {
-                            const { lat, lng } = e.latlng;
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const lat = position.coords.latitude;
+                                const lng = position.coords.longitude;
 
-                            if (marker) {
-                                marker.setLatLng([lat, lng]);
-                            } else {
-                                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                                marker.on('dragend', updateCoords);
-                            }
-                            updateCoords({ target: marker });
-                        });
+                                map.setView([lat, lng], 16);
 
-                        document.getElementById('geolocate').addEventListener('click', function() {
-                            if (!navigator.geolocation) {
-                                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
-                                return;
-                            }
-
-                            this.textContent = '⏳ Localisation...';
-                            this.disabled = true;
-
-                            navigator.geolocation.getCurrentPosition(
-                                (position) => {
-                                    const lat = position.coords.latitude;
-                                    const lng = position.coords.longitude;
-
-                                    map.setView([lat, lng], 16);
-
-                                    if (marker) {
-                                        marker.setLatLng([lat, lng]);
-                                    } else {
-                                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                                        marker.on('dragend', updateCoords);
-                                    }
-
-                                    document.getElementById('latitude').value = lat.toFixed(6);
-                                    document.getElementById('longitude').value = lng.toFixed(6);
-                                    document.getElementById('coords-display').textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-
-                                    this.textContent = '📍 Me localiser';
-                                    this.disabled = false;
-                                },
-                                (error) => {
-                                    alert('Impossible de vous localiser. Vérifiez les permissions.');
-                                    this.textContent = '📍 Me localiser';
-                                    this.disabled = false;
+                                if (marker) {
+                                    marker.setLatLng([lat, lng]);
+                                } else {
+                                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                    marker.on('dragend', updateCoords);
                                 }
-                            );
-                        });
+
+                                const latInput = document.getElementById('latitude');
+                                const lngInput = document.getElementById('longitude');
+                                const display = document.getElementById('coords-display');
+
+                                if (latInput) latInput.value = lat.toFixed(6);
+                                if (lngInput) lngInput.value = lng.toFixed(6);
+                                if (display) display.textContent = `📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+                                textEl.textContent = 'Me localiser';
+                                geoBtn.disabled = false;
+                                iconEl.classList.remove('animate-spin');
+                            },
+                            (error) => {
+                                alert('Impossible de vous localiser. Vérifiez les permissions.');
+                                textEl.textContent = 'Me localiser';
+                                geoBtn.disabled = false;
+                                iconEl.classList.remove('animate-spin');
+                            }
+                        );
                     });
-                </script>
-                
-                <button type="button" id="geolocate"
-                    class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium py-2 px-4 rounded-lg transition-colors">
-                    📍 Me localiser
-                </button>
-            </div>
+                }
+            }
+
+            // Exécution immédiate (pour le premier chargement ou chargement standard)
+            initMap();
+            
+            // Support HTMX SPA : Ré-initialise la carte si injectée via AJAX
+            document.body.addEventListener('htmx:afterSwap', function(e) {
+                if (e.detail.target.id === 'dashboard-main-content' || e.detail.target.contains(document.getElementById('map'))) {
+                    initMap();
+                }
+            });
+        })();
+    </script>
+</div>
 
             <input type="hidden" name="latitude" id="latitude" value="{{ form.latitude.value|default:'' }}">
             <input type="hidden" name="longitude" id="longitude" value="{{ form.longitude.value|default:'' }}">
             {% if form.latitude.errors %}<p class="text-xs text-red-500 mt-1">La position sur la carte est requise.</p>{% endif %}
 
-            <p id="coords-display" class="text-xs text-gray-400">
+            <p id="coords-display" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg w-max">
                 {% if form.latitude.value and form.longitude.value %}
-                    📍 {{ form.latitude.value }}, {{ form.longitude.value }}
+                    <svg class="text-slate-400 shrink-0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ form.latitude.value|floatformat:6 }}, {{ form.longitude.value|floatformat:6 }}</span>
                 {% else %}
-                    📍 Aucune position sélectionnée
+                    <svg class="text-slate-300 shrink-0" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span class="italic text-slate-400/80">Aucune position sélectionnée</span>
                 {% endif %}
             </p>
         </div>
