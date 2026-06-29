@@ -27,6 +27,30 @@
     document.body.addEventListener('htmx:configRequest', (e) => {
         e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
     });
+    // 1. Script de détection immédiate (à placer idéalement dans le <head> pour éviter le flash blanc)
+if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+} else {
+    document.documentElement.classList.remove('dark');
+}
+
+// 2. Écouteur de clic (à exécuter une fois le DOM chargé)
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            // Si la classe dark y est, on l'enlève, sinon on la rajoute
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    }
+});
 </script>
 
 </html>
