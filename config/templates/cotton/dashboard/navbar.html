@@ -1,0 +1,118 @@
+<!-- Overlay mobile -->
+    <div x-show="open"
+         x-transition:enter="transition-opacity duration-200"
+         x-transition:leave="transition-opacity duration-200"
+         @click="open = false"
+         class="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside :class="open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+           class="fixed md:relative z-40 w-56 h-full bg-white border-r border-[#f0f0ee] flex flex-col transition-transform duration-300 ease-in-out">
+
+        <!-- Bouton fermer mobile -->
+        <button @click="open = false"
+                class="md:hidden absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-lg">✕</button>
+
+        <!-- Logo -->
+        <div class="px-4 py-4 border-b border-[#f0f0ee]">
+            <a href="{% url 'home' %}" class="text-xl font-extrabold text-orange-500 tracking-tight">HAVEN</a>
+            <p class="text-xs text-gray-400 mt-0.5">Mon espace</p>
+        </div>
+
+        <!-- Avatar -->
+        <div class="px-4 py-3 border-b border-[#f0f0ee] flex items-center gap-2.5">
+            <div class="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                {% if request.user.avatar %}
+                    <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover">
+                {% else %}
+                    {{ request.user.username|first|upper }}
+                {% endif %}
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-[#18181b] truncate">{{ request.user.username }}</p>
+                <p class="text-xs text-gray-400">Membre</p>
+            </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
+
+            <p class="text-xs font-semibold text-gray-300 uppercase tracking-widest px-2 py-2">Menu</p>
+
+            <a href="{% url 'dashboard' %}" @click="open = false"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if active_tab == 'listings' %}bg-orange-50 text-orange-500 font-semibold{% else %}text-gray-500 hover:bg-gray-50 hover:text-gray-700{% endif %}">
+                ⊞ Mes annonces
+                {% if listings_count %}
+                <span class="ml-auto bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ listings_count }}</span>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'favorite' %}" @click="open = false"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if active_tab == 'favorites' %}bg-orange-50 text-orange-500 font-semibold{% else %}text-gray-500 hover:bg-gray-50 hover:text-gray-700{% endif %}">
+                ♡ Favoris
+                {% if favorites_count %}
+                <span class="ml-auto bg-gray-100 text-gray-500 text-xs font-bold px-1.5 py-0.5 rounded-full">{{ favorites_count }}</span>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'visits_received' %}" @click="open = false"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if active_tab == 'received' %}bg-orange-50 text-orange-500 font-semibold{% else %}text-gray-500 hover:bg-gray-50 hover:text-gray-700{% endif %}">
+                📅 Visites reçues
+                {% if visits_pending_count %}
+                <span class="ml-auto bg-yellow-100 text-yellow-700 text-xs font-bold px-1.5 py-0.5 rounded-full">{{ visits_pending_count }}</span>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'visits_sent' %}" @click="open = false"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if active_tab == 'sent' %}bg-orange-50 text-orange-500 font-semibold{% else %}text-gray-500 hover:bg-gray-50 hover:text-gray-700{% endif %}">
+                ✈ Visites envoyées
+            </a>
+
+            <a href="{% url 'notifications_list' %}" @click="open = false"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if active_tab == 'notifications' %}bg-orange-50 text-orange-500 font-semibold{% else %}text-gray-500 hover:bg-gray-50 hover:text-gray-700{% endif %}">
+                🔔 Notifications
+                {% if unread_notifications %}
+                <span class="ml-auto bg-red-100 text-red-500 text-xs font-bold px-1.5 py-0.5 rounded-full">{{ unread_notifications }}</span>
+                {% endif %}
+            </a>
+
+            <p class="text-xs font-semibold text-gray-300 uppercase tracking-widest px-2 pt-4 pb-2">Compte</p>
+
+            <a href="{% url 'profile' %}" @click="open = false"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors
+               {% if active_tab == 'profile' %}bg-orange-50 text-orange-500 font-semibold{% else %}text-gray-500 hover:bg-gray-50 hover:text-gray-700{% endif %}">
+                👤 Mon profil
+            </a>
+
+            <a href="{% url 'home' %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
+                ↗ Voir le site
+            </a>
+
+        </nav>
+
+        <!-- Publier -->
+        <div class="px-3 pb-2">
+            <a href="{% url 'create-listing' %}"
+               class="block w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl text-center transition-colors">
+                + Publier une annonce
+            </a>
+        </div>
+
+        <!-- Logout -->
+        <div class="px-3 pb-3">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full border border-gray-200 text-gray-400 hover:text-gray-600 text-xs font-medium py-2 rounded-xl transition-colors">
+                    ⏏ Se déconnecter
+                </button>
+            </form>
+        </div>
+
+    </aside>

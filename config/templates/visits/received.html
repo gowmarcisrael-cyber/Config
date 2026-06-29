@@ -13,67 +13,7 @@
 <!-- Liste -->
 <div class="bg-white border border-[#f0f0ee] rounded-xl overflow-hidden">
     {% for visit in visits %}
-    <div id="visit-{{ visit.pk }}" 
-         class="flex flex-col sm:flex-row gap-4 p-4 border-b border-[#f8f7f4] last:border-0 hover:bg-gray-50 transition-colors">
-
-        <!-- Image -->
-        <div class="w-full sm:w-16 h-32 sm:h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-            {% if visit.listing.get_first_image %}
-                <img src="{{ visit.listing.get_first_image }}" class="w-full h-full object-cover">
-            {% else %}
-                <div class="w-full h-full flex items-center justify-center text-2xl">🏠</div>
-            {% endif %}
-        </div>
-
-        <!-- Infos -->
-        <div class="flex-1 min-w-0">
-            <a href="{% url 'listing_detail' visit.listing.slug %}"
-               class="font-semibold text-slate-800 text-sm hover:text-orange-500 transition-colors truncate block">
-                {{ visit.listing.title }}
-            </a>
-            <div class="flex flex-wrap items-center gap-2 mt-1">
-                <span class="text-xs text-gray-400">👤 {{ visit.sender.username }}</span>
-                <span class="text-gray-200">·</span>
-                <span class="text-xs text-gray-400">📅 {{ visit.date|date:"d/m/Y à H:i" }}</span>
-            </div>
-            {% if visit.message %}
-            <p class="text-xs text-gray-500 mt-1.5 bg-gray-50 rounded-lg px-3 py-1.5 line-clamp-2">
-                "{{ visit.message }}"
-            </p>
-            {% endif %}
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center gap-2 flex-shrink-0">
-            {% include 'visits/partials/visits_status.html' %}
-            {% if visit.status == 'En attente' %}
-            <button hx-post="{% url 'update_visit_status' visit.pk %}"
-                    hx-vals='{"status": "Acceptée"}'
-                    hx-target="#visit-{{ visit.pk }} .visit-status"
-                    hx-swap="outerHTML"
-                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
-                ✓ Accepter
-            </button>
-            <button hx-post="{% url 'update_visit_status' visit.pk %}"
-                    hx-vals='{"status": "Refusée"}'
-                    hx-target="#visit-{{ visit.pk }} .visit-status"
-                    hx-swap="outerHTML"
-                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
-                ✕ Refuser
-            </button>
-            {% endif %}
-            {% if visit.status != 'Annulée' and visit.status != 'Refusée' %}
-            <button hx-post="{% url 'cancel_visit' visit.pk %}"
-                    hx-target="#visit-{{ visit.pk }}"
-                    hx-swap="outerHTML"
-                    hx-confirm="Annuler cette visite ?"
-                    class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-50 text-gray-400 hover:bg-gray-100 transition-colors">
-                Annuler
-            </button>
-            {% endif %}
-        </div>
-
-    </div>
+    <c-visit-card :visit="visit"></c-visit-card>
     {% empty %}
     <div class="text-center py-16 text-gray-400">
         <p class="text-4xl mb-3">📬</p>

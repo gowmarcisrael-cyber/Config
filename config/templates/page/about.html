@@ -3,14 +3,17 @@
 
 {% block extra_head %}
 <style>
-  .parallax {
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
-  }
-  @media (max-width: 768px) {
-    .parallax { background-attachment: scroll; }
-  }
+    .parallax {
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+    }
+
+    @media (max-width: 768px) {
+        .parallax {
+            background-attachment: scroll;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -18,7 +21,7 @@
 
 <!-- Hero parallax -->
 <div class="parallax min-h-screen flex items-center justify-center relative"
-     style="background-image: linear-gradient(rgba(15,23,42,0.75), rgba(15,23,42,0.75)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600');">
+    style="background-image: linear-gradient(rgba(15,23,42,0.75), rgba(15,23,42,0.75)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600');">
     <div class="text-center px-6 relative z-10">
         <p class="text-orange-400 text-xs font-semibold tracking-widest uppercase mb-4">À propos de nous</p>
         <h1 class="text-white text-5xl font-bold mb-6 leading-tight">
@@ -72,7 +75,7 @@
 
 <!-- Parallax 2 -->
 <div class="parallax py-32 px-6"
-     style="background-image: linear-gradient(rgba(15,23,42,0.8), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600');">
+    style="background-image: linear-gradient(rgba(15,23,42,0.8), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1600');">
     <div class="max-w-3xl mx-auto text-center">
         <p class="text-orange-400 text-xs font-semibold tracking-widest uppercase mb-4">Notre vision</p>
         <h2 class="text-white text-4xl font-bold leading-tight">
@@ -85,27 +88,66 @@
 <div class="bg-gray-50 py-24 px-6">
     <div class="max-w-5xl mx-auto">
         <div class="text-center mb-16">
-            <p class="text-orange-500 text-xs font-semibold tracking-widest uppercase mb-3">Ce qui nous guide</p>
-            <h2 class="text-3xl font-bold text-slate-800">Nos valeurs</h2>
+            <p class="text-orange-500 text-xs font-bold tracking-widest uppercase mb-3">Ce qui nous guide</p>
+            <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Nos valeurs</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
-                <div class="text-4xl mb-4">🤝</div>
-                <h3 class="font-bold text-slate-800 mb-3">Confiance</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Confiance -->
+            <div
+                class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col items-center text-center">
+                <div
+                    class="w-14 h-14 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center mb-5 shrink-0">
+                    <!-- Lucide: handshake -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="m11 17 2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-2-2a1 1 0 0 0-1.4 0l-2 2a1 1 0 0 0 0 1.4Z" />
+                        <path
+                            d="m13 11-2-2a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l2 2a1 1 0 0 0 1.4 0l2-2a1 1 0 0 0 0-1.4Z" />
+                        <path d="m8.5 10.5 7.5 7.5" />
+                        <path d="m10.5 8.5 7.5 7.5" />
+                        <path d="M2 13a6 6 0 0 1 6-6h1V6a2 2 0 0 1 2-2h1" />
+                        <path d="M22 11a6 6 0 0 1-6 6h-1v1a2 2 0 0 1-2 2h-1" />
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-800 text-lg mb-3">Confiance</h3>
                 <p class="text-sm text-gray-500 leading-relaxed">
                     Chaque annonce est vérifiée. Chaque utilisateur est protégé.
                 </p>
             </div>
-            <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
-                <div class="text-4xl mb-4">⚡</div>
-                <h3 class="font-bold text-slate-800 mb-3">Simplicité</h3>
+
+            <!-- Simplicité -->
+            <div
+                class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col items-center text-center">
+                <div
+                    class="w-14 h-14 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-5 shrink-0">
+                    <!-- Lucide: zap -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-800 text-lg mb-3">Simplicité</h3>
                 <p class="text-sm text-gray-500 leading-relaxed">
                     Des outils clairs et intuitifs pour tous, sans jargon technique.
                 </p>
             </div>
-            <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
-                <div class="text-4xl mb-4">🌍</div>
-                <h3 class="font-bold text-slate-800 mb-3">Impact local</h3>
+
+            <!-- Impact local -->
+            <div
+                class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col items-center text-center">
+                <div
+                    class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5 shrink-0">
+                    <!-- Lucide: globe -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                        <path d="M2 12h20" />
+                    </svg>
+                </div>
+                <h3 class="font-bold text-slate-800 text-lg mb-3">Impact local</h3>
                 <p class="text-sm text-gray-500 leading-relaxed">
                     Conçu pour le Burkina Faso, par des gens qui le connaissent.
                 </p>
@@ -113,19 +155,18 @@
         </div>
     </div>
 </div>
-
 <!-- CTA parallax -->
 <div class="parallax py-32 px-6"
-     style="background-image: linear-gradient(rgba(249,115,22,0.9), rgba(234,88,12,0.9)), url('https://images.unsplash.com/photo-1582407947304-fd86f28f6c9e?w=1600');">
+    style="background-image: linear-gradient(rgba(249,115,22,0.9), rgba(234,88,12,0.9)), url('https://images.unsplash.com/photo-1582407947304-fd86f28f6c9e?w=1600');">
     <div class="max-w-2xl mx-auto text-center">
         <h2 class="text-white text-4xl font-bold mb-6">Prêt à trouver votre bien idéal ?</h2>
         <div class="flex gap-4 justify-center">
             <a href="{% url 'search' %}"
-               class="bg-white text-orange-500 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors">
+                class="bg-white text-orange-500 font-semibold px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors">
                 Voir les annonces
             </a>
             <a href="{% url 'register' %}"
-               class="border-2 border-white text-white font-semibold px-8 py-3 rounded-xl hover:bg-white hover:text-orange-500 transition-colors">
+                class="border-2 border-white text-white font-semibold px-8 py-3 rounded-xl hover:bg-white hover:text-orange-500 transition-colors">
                 Créer un compte
             </a>
         </div>

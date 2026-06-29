@@ -2,7 +2,7 @@
     <button hx-get="{% url 'delete_confirm' %}"
             hx-target="#delete-section"
             hx-swap="outerHTML"
-            class="border border-red-100 text-red-400 hover:bg-red-50 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-        🗑️ Supprimer mon compte
+            class="flex items-center gap-2 border border-red-100 text-red-400 hover:bg-red-50 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+        <i data-lucide="trash-2" class="w-4 h-4"></i> Supprimer mon compte
     </button>
 </div>

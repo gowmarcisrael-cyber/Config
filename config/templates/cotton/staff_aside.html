@@ -1,0 +1,91 @@
+<aside class="w-56 bg-[#0f0f0f] flex flex-col flex-shrink-0">
+
+        <!-- Logo -->
+        <div class="px-4 py-5 border-b border-[#1f1f1f]">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">H</div>
+                <div>
+                    <p class="text-white text-sm font-bold tracking-tight">HAVEN</p>
+                    <p class="text-[#525252] text-xs">Administration</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
+
+    <p class="text-[#3f3f3f] text-xs font-bold uppercase tracking-widest px-3 py-2">Gestion</p>
+
+    <a href="{% url 'staff_stats' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors group
+       {% if request.resolver_match.url_name == 'staff_stats' %}bg-[#1a1a1a] text-white font-semibold{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+        <svg class="shrink-0 {% if request.resolver_match.url_name == 'staff_stats' %}text-white{% else %}text-[#737373] group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="10" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span>Tableau de bord</span>
+    </a>
+
+    <a href="{% url 'staff_listings' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors group
+       {% if request.resolver_match.url_name == 'staff_listings' %}bg-[#1a1a1a] text-white font-semibold{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+        <svg class="shrink-0 {% if request.resolver_match.url_name == 'staff_listings' %}text-white{% else %}text-[#737373] group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+        <span>Annonces</span>
+        {% if pending_listings_count %}
+        <span class="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm shadow-red-500/20">{{ pending_listings_count }}</span>
+        {% endif %}
+    </a>
+
+    <a href="{% url 'staff_users' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors group
+       {% if request.resolver_match.url_name == 'staff_users' %}bg-[#1a1a1a] text-white font-semibold{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+        <svg class="shrink-0 {% if request.resolver_match.url_name == 'staff_users' %}text-white{% else %}text-[#737373] group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Utilisateurs</span>
+    </a>
+
+    <a href="{% url 'staff_reports' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors group
+       {% if request.resolver_match.url_name == 'staff_reports' %}bg-[#1a1a1a] text-white font-semibold{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+        <svg class="shrink-0 {% if request.resolver_match.url_name == 'staff_reports' %}text-white{% else %}text-[#737373] group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="4" y1="22" y2="15"/><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+        <span>Signalements</span>
+        {% if pending_reports_count %}
+        <span class="ml-auto bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm shadow-orange-500/20">{{ pending_reports_count }}</span>
+        {% endif %}
+    </a>
+
+    <a href="{% url 'staff_messages' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors group
+       {% if request.resolver_match.url_name == 'staff_messages' %}bg-[#1a1a1a] text-white font-semibold{% else %}text-[#737373] hover:bg-[#1a1a1a] hover:text-white{% endif %}">
+        <svg class="shrink-0 {% if request.resolver_match.url_name == 'staff_messages' %}text-white{% else %}text-[#737373] group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Messages</span>
+    </a>
+
+    <p class="text-[#3f3f3f] text-xs font-bold uppercase tracking-widest px-3 pt-5 pb-2">Système</p>
+
+    <a href="{% url 'admin:index' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#737373] hover:bg-[#1a1a1a] hover:text-white transition-colors group">
+        <svg class="text-[#737373] group-hover:text-white shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Admin Django</span>
+    </a>
+
+    <a href="{% url 'home' %}"
+       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#737373] hover:bg-[#1a1a1a] hover:text-white transition-colors group">
+        <svg class="text-[#737373] group-hover:text-white shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        <span>Voir le site</span>
+    </a>
+
+</nav>
+
+        <!-- User -->
+        <div class="px-3 py-3 border-t border-[#1a1a1a] flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                {{ request.user.username|first|upper }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[#e5e5e5] text-xs font-semibold truncate">{{ request.user.username }}</p>
+                <p class="text-[#525252] text-xs">Staff</p>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-[#525252] hover:text-white text-sm transition-colors">⏏</button>
+            </form>
+        </div>
+
+    </aside>

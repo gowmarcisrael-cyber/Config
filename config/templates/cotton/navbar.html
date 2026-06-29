@@ -1,0 +1,252 @@
+{% load static %}
+<nav class="bg-white border-b border-gray-100 sticky top-0 z-50" x-data="{ open: false }">
+    <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+
+        <img src="{% static 'images/haven_logo.svg' %}" alt="HAVEN" class="h-8">
+
+        <!-- Liens desktop -->
+        <div class="hidden md:flex gap-6 text-sm font-medium text-gray-500">
+            <a href="{% url 'home' %}"
+                class="hover:text-orange-500 {% if request.resolver_match.url_name == 'home' %}text-orange-500{% endif %}">Accueil</a>
+            <a href="{% url 'search' %}"
+                class="hover:text-orange-500 {% if request.resolver_match.url_name == 'search' %}text-orange-500{% endif %}">Annonces</a>
+            <a href="{% url 'about' %}"
+                class="hover:text-orange-500 {% if request.resolver_match.url_name == 'about' %}text-orange-500{% endif %}">À
+                propos</a>
+            <a href="{% url 'contact' %}"
+                class="hover:text-orange-500 {% if request.resolver_match.url_name == 'contact' %}text-orange-500{% endif %}">Contact</a>
+            <a href="{% url 'map' %}"
+                class="hover:text-orange-500 {% if request.resolver_match.url_name == 'map' %}text-orange-500{% endif %}">Carte</a>
+        </div>
+
+        <!-- Auth desktop -->
+<div class="hidden md:flex items-center gap-4">
+    {% if request.user.is_authenticated %}
+    <div class="relative" x-data="{ open: false }">
+        <!-- Bouton Utilisateur / Dropdown Toggle -->
+        <button @click="open = !open"
+            class="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-1.5 hover:border-orange-400 bg-white transition-all duration-200 shadow-sm">
+            <div class="w-6 h-6 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400 shrink-0">
+                {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover">
+                {% else %}
+                <!-- Lucide: user -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {% endif %}
+            </div>
+            <span class="text-sm font-semibold text-slate-700 max-w-[120px] truncate">{{ request.user.username }}</span>
+            <!-- Lucide: chevron-down -->
+            <svg class="text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <!-- Menu Déroulant (Dropdown) -->
+        <div x-show="open" @click.away="open = false"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 transform scale-95"
+            x-transition:enter-end="opacity-100 transform scale-100"
+            class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-50 origin-top-right">
+            
+            <!-- Tableau de bord -->
+            <a href="{% url 'dashboard' %}"
+                class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors">
+                <!-- Lucide: layout-dashboard -->
+                <svg class="text-gray-400 current-color" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="10" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                Tableau de bord
+            </a>
+
+            <!-- Profil -->
+            <a href="{% url 'profile' %}"
+                class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors">
+                <!-- Lucide: user -->
+                <svg class="text-gray-400 current-color" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Mon profil
+            </a>
+
+            <!-- Publier -->
+            <a href="{% url 'create-listing' %}"
+                class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors">
+                <!-- Lucide: plus-circle -->
+                <svg class="text-gray-400 current-color" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                Publier une annonce
+            </a>
+
+            <!-- Notifications -->
+            <a href="{% url 'notifications_list' %}"
+                class="flex items-center justify-between px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors">
+                <div class="flex items-center gap-2.5">
+                    <!-- Lucide: bell -->
+                    <svg class="text-gray-400 current-color" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                    <span>Notifications</span>
+                </div>
+                {% if unread_notifications %}
+                <span class="bg-orange-500 text-white text-[11px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center shadow-sm shadow-orange-500/20">
+                    {{ unread_notifications }}
+                </span>
+                {% endif %}
+            </a>
+
+            <!-- Staff / Admin -->
+            {% if request.user.is_staff %}
+            <a href="{% url 'staff_listings' %}"
+                class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors">
+                <!-- Lucide: shield-check -->
+                <svg class="text-gray-400 current-color" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6v7z"/><polyline points="9 11 11 13 15 9"/></svg>
+                Administration
+            </a>
+            {% endif %}
+
+            <div class="border-t border-gray-100 my-1.5"></div>
+
+            <!-- Déconnexion -->
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" 
+                    class="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors font-medium">
+                    <!-- Lucide: log-out -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Se déconnecter
+                </button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <!-- État Déconnecté (Boutons Connexion / Inscription) -->
+    <a href="{% url 'login' %}"
+        class="border border-gray-200 px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-gray-50 transition-colors flex items-center gap-2 bg-white">
+        <!-- Lucide: log-in -->
+        <svg class="text-slate-500" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+        Connexion
+    </a>
+    <a href="{% url 'register' %}"
+        class="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-orange-600 transition-all shadow-md shadow-orange-500/10 flex items-center gap-2">
+        <!-- Lucide: user-plus -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+        S'inscrire
+    </a>
+    {% endif %}
+</div>
+
+        <!-- Bouton hamburger mobile -->
+        <button @click="open = !open" class="md:hidden text-gray-500 hover:text-orange-500 focus:outline-none">
+            <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg x-show="open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+    </div>
+
+    <!-- Menu mobile -->
+<div x-show="open" x-transition 
+    class="md:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-1 shadow-inner">
+    
+    <!-- Liens principaux de navigation -->
+    <a href="{% url 'home' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+        <!-- Lucide: home -->
+        <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Accueil
+    </a>
+    <a href="{% url 'search' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+        <!-- Lucide: search -->
+        <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Annonces
+    </a>
+    <a href="{% url 'about' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+        <!-- Lucide: info -->
+        <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        À propos
+    </a>
+    <a href="{% url 'contact' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+        <!-- Lucide: phone -->
+        <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Contact
+    </a>
+
+    <!-- Zone utilisateur (Séparateur) -->
+    <div class="border-t border-gray-100 pt-4 mt-2 space-y-1">
+        {% if request.user.is_authenticated %}
+        <!-- Badge utilisateur -->
+        <div class="px-1 py-1.5 mb-2 bg-slate-50 rounded-lg flex items-center gap-2">
+            <div class="w-5 h-5 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center text-[10px] font-bold">
+                U
+            </div>
+            <p class="text-xs font-bold text-slate-500 tracking-wide uppercase">{{ request.user.username }}</p>
+        </div>
+
+        <!-- Tableau de bord -->
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+            <!-- Lucide: layout-dashboard -->
+            <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="10" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+            Tableau de bord
+        </a>
+
+        <!-- Profil -->
+        <a href="{% url 'profile' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+            <!-- Lucide: user -->
+            <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Mon profil
+        </a>
+
+        <!-- Créer Annonce -->
+        <a href="{% url 'create-listing' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+            <!-- Lucide: plus-circle -->
+            <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            Publier une annonce
+        </a>
+
+        <!-- Notifications -->
+        <a href="{% url 'notifications_list' %}" class="flex items-center justify-between py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+            <div class="flex items-center gap-3">
+                <!-- Lucide: bell -->
+                <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                <span>Notifications</span>
+            </div>
+            {% if unread_notifications %}
+            <span class="bg-orange-500 text-white text-[11px] font-bold rounded-full px-2 py-0.5">
+                {{ unread_notifications }}
+            </span>
+            {% endif %}
+        </a>
+
+        <!-- Modérateur / Staff -->
+        {% if request.user.is_staff %}
+        <a href="{% url 'staff_listings' %}" class="flex items-center gap-3 py-2.5 text-sm font-semibold text-gray-600 hover:text-orange-500 transition-colors">
+            <!-- Lucide: shield-check -->
+            <svg class="text-gray-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6v7z"/><polyline points="9 11 11 13 15 9"/></svg>
+            Administration
+        </a>
+        {% endif %}
+
+        <!-- Déconnexion -->
+        <form method="post" action="{% url 'logout' %}" class="pt-2">
+            {% csrf_token %}
+            <button type="submit" class="flex items-center gap-3 py-2 text-sm font-bold text-red-500 hover:text-red-600 transition-colors w-full text-left">
+                <!-- Lucide: log-out -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                Se déconnecter
+            </button>
+        </form>
+
+        {% else %}
+        <!-- État non authentifié -->
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <a href="{% url 'login' %}"
+                class="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:bg-gray-50 transition-colors bg-white">
+                <!-- Lucide: log-in -->
+                <svg class="text-slate-500" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                Connexion
+            </a>
+            <a href="{% url 'register' %}"
+                class="flex items-center justify-center gap-2 bg-orange-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors shadow-md shadow-orange-500/10">
+                <!-- Lucide: user-plus -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                S'inscrire
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+</nav>

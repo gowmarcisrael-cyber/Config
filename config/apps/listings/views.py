@@ -242,7 +242,7 @@ def listing_delete(request,slug):
 @require_POST
 def listing_change_status(request, slug):
     cache.delete(f'dashboard_{request.user.pk}')
-    cache.delete(f'listing-{listing.slug}')
+    cache.delete(f'listing-{slug}')
     listing = get_object_or_404(Listing, slug=slug, user=request.user)
     new_status = request.POST.get('status')
     if new_status in dict(Listing.STATUS):

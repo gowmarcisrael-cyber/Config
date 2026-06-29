@@ -1,8 +1,20 @@
 <button hx-post="{% url 'staff_toggle_user' user.pk %}"
         hx-target="this"
         hx-swap="outerHTML"
-        class="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors
-            {% if user.is_active %}bg-green-100 text-green-700 hover:bg-red-50 hover:text-red-500
-            {% else %}bg-red-50 text-red-400 hover:bg-green-100 hover:text-green-700{% endif %}">
-    {% if user.is_active %}✅ Actif{% else %}🚫 Désactivé{% endif %}
+        class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors group
+            {% if user.is_active %}
+                bg-emerald-50 text-emerald-700 hover:bg-red-50 hover:text-red-600 border border-emerald-200/50 hover:border-red-200/50
+            {% else %}
+                bg-rose-50 text-rose-500 hover:bg-emerald-50 hover:text-emerald-700 border border-rose-200/30 hover:border-emerald-200/50
+            {% endif %}">
+    
+    {% if user.is_active %}
+        <svg class="shrink-0 text-emerald-600 group-hover:text-red-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+        <span class="group-hover:hidden">Actif</span>
+        <span class="hidden group-hover:inline">Désactiver</span>
+    {% else %}
+        <svg class="shrink-0 text-rose-400 group-hover:text-emerald-600 transition-colors" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" x2="16" y1="11" y2="17"/><line x1="16" x2="22" y1="11" y2="17"/></svg>
+        <span class="group-hover:hidden">Désactivé</span>
+        <span class="hidden group-hover:inline">Activer</span>
+    {% endif %}
 </button>

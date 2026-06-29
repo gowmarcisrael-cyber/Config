@@ -4,46 +4,57 @@
 {% block title %}HAVEN — Immobilier au Burkina Faso{% endblock %}
 
 {% block content %}
-
-<!-- Hero -->
-<div class="bg-slate-900 py-12 px-4 text-center relative overflow-hidden">
-    <div class="absolute -top-16 -right-16 w-48 h-48 bg-orange-500 opacity-5 rounded-full"></div>
-    <div class="absolute -bottom-10 -left-10 w-36 h-36 bg-indigo-500 opacity-5 rounded-full"></div>
-
-    <p class="text-orange-400 text-xs font-bold tracking-widest uppercase mb-3">Immobilier au Burkina Faso</p>
-    <h1 class="text-white text-3xl md:text-4xl font-extrabold leading-tight mb-3 tracking-tight">
-        Trouvez votre bien idéal
-    </h1>
-    <p class="text-slate-400 text-sm mb-8">Appartements · Maisons · Terrains · Locaux commerciaux</p>
-
-    <!-- Search bar -->
-    <form method="get" action="{% url 'search' %}"
-          class="bg-white rounded-xl p-3 max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
+<c-hero></c-hero>
+<!-- Comment ça marche -->
+<div class="bg-white py-16 px-4">
+    <div class="max-w-4xl mx-auto text-center mb-12">
+        <p class="text-orange-500 text-xs font-bold tracking-widest uppercase mb-2">Simple & rapide</p>
+        <h2 class="text-2xl font-extrabold text-slate-800">Publiez votre bien en 3 étapes</h2>
+    </div>
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
         <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Type</label>
-            <select name="property_type"
-                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <option value="">Tous les types</option>
-                {% for value, label in types %}
-                <option value="{{ value }}">{{ label }}</option>
-                {% endfor %}
-            </select>
+            <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Publiez</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Créez votre annonce avec photos et description</p>
         </div>
         <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Ville</label>
-            <input type="text" name="city" placeholder="Ex: Ouagadougou"
-                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+            <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Soyez visible</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Des milliers d'acheteurs voient votre bien</p>
         </div>
         <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Prix max</label>
-            <input type="number" name="price_max" placeholder="Budget FCFA"
-                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+            <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Validez</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Notre équipe vérifie et approuve votre annonce</p>
         </div>
-        <button type="submit"
-                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors w-full">
-            Rechercher →
-        </button>
-    </form>
+        <div>
+            <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Concluez</h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Recevez des demandes de visite et vendez</p>
+        </div>
+    </div>
 </div>
 
 <!-- Annonces -->
@@ -54,86 +65,16 @@
             <p class="text-xs text-gray-400 mt-0.5">{{ listings|length }} biens disponibles</p>
         </div>
         <a href="{% url 'search' %}"
-           class="text-xs font-semibold text-orange-500 border border-orange-200 bg-orange-50 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors">
+            class="text-xs font-semibold text-orange-500 border border-orange-200 bg-orange-50 px-3 py-1.5 rounded-lg hover:bg-orange-100 transition-colors">
             Voir tout →
         </a>
     </div>
 
-    <div class="flex flex-wrap gap-4 justify-center">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
         {% for listing in listings %}
-        <!-- carte -->
-        <div class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full max-w-[300px] mx-auto">
-    
-            <!-- Image -->
-            <div class="relative h-48 bg-gray-100">
-                {% if listing.get_first_image %}
-                    <img src="{{ listing.get_first_image }}" alt="{{ listing.title }}"
-                        class="w-full h-full object-cover">
-                {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-gray-50 to-gray-100">🏠</div>
-                {% endif %}
-
-                <!-- Badge statut -->
-                <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
-                    {% if listing.status == 'A louer' %}bg-green-100 text-green-800
-                    {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
-                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                    {{ listing.status }}
-                </span>
-
-                <!-- Bouton favori -->
-                {% if request.user.is_authenticated %}
-                <div class="absolute top-2 right-2">
-                    {% is_favorited request.user listing as is_fav %}
-                    {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Contenu -->
-            <div class="p-4">
-                <!-- Ville + Type -->
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-1 text-xs text-gray-400 font-medium">
-                        <img src="{% static 'images/gps.png' %}" alt="" class="w-3.5 h-3.5">
-                        <span>{{ listing.city }}</span>
-                    </div>
-                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">
-                        {{ listing.property_type }}
-                    </span>
-                </div>
-
-                <!-- Titre -->
-                <h3 class="font-bold text-slate-800 text-sm mb-1 truncate">{{ listing.title }}</h3>
-
-                <!-- Description -->
-                <p class="text-xs text-gray-400 mb-3 line-clamp-2 leading-relaxed">{{ listing.description }}</p>
-
-                <!-- Prix -->
-                <p class="text-orange-500 font-extrabold text-base mb-3">
-                    {{ listing.price|floatformat:0 }}
-                    <span class="text-xs font-medium text-gray-400">FCFA{% if listing.status == 'A louer' %}/mois{% endif %}</span>
-                </p>
-
-                <!-- Caractéristiques + Lien -->
-                <div class="flex items-center justify-between border-t border-gray-50 pt-3">
-                    <div class="flex gap-3 text-xs text-gray-400">
-                        {% if listing.bedrooms %}<span>🛏 {{ listing.bedrooms }}</span>{% endif %}
-                        {% if listing.bathrooms %}<span>🚿 {{ listing.bathrooms }}</span>{% endif %}
-                        {% if listing.area %}<span>📐 {{ listing.area }}m²</span>{% endif %}
-                    </div>
-                    <a href="{% url 'listing_detail' listing.slug %}"
-                    class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
-                        Voir →
-                    </a>
-                </div>
-            </div>
-        </div>
+        <c-card :listing="listing"></c-card>
         {% empty %}
-        <div class="col-span-3 text-center py-16 text-gray-400">
-            <p class="text-4xl mb-3">🏠</p>
-            <p class="text-sm">Aucune annonce disponible.</p>
-        </div>
+        <div class="col-span-3 text-center py-16 text-gray-400">Aucune annonce disponible.</div>
         {% endfor %}
     </div>
 </div>
@@ -159,5 +100,44 @@
         </div>
     </div>
 </div>
+<script>
+    const cityInput = document.getElementById('city-input');
+const citySuggestions = document.getElementById('city-suggestions');
 
+cityInput.addEventListener('input', function() {
+    const q = this.value;
+    if (q.length < 2) {
+        citySuggestions.classList.add('hidden');
+        return;
+    }
+
+    fetch(`/autocomplete/cities/?q=${encodeURIComponent(q)}`)
+        .then(res => res.json())
+        .then(cities => {
+            if (cities.length === 0) {
+                citySuggestions.classList.add('hidden');
+                return;
+            }
+            citySuggestions.innerHTML = cities.map(city => `
+                <div class="px-4 py-2 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 cursor-pointer city-option">
+                    📍 ${city}
+                </div>
+            `).join('');
+            citySuggestions.classList.remove('hidden');
+
+            citySuggestions.querySelectorAll('.city-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    cityInput.value = this.textContent.replace('📍 ', '').trim();
+                    citySuggestions.classList.add('hidden');
+                });
+            });
+        });
+});
+
+document.addEventListener('click', function(e) {
+    if (!cityInput.contains(e.target) && !citySuggestions.contains(e.target)) {
+        citySuggestions.classList.add('hidden');
+    }
+});
+</script>
 {% endblock %}

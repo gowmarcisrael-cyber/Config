@@ -1,16 +1,19 @@
-<button
-    hx-post="{% url 'read-msg' msg.pk %}"
-    hx-target="this"
-    hx-swap="outerHTML"
-    class="px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+<button hx-post="{% url 'read-msg' msg.pk %}"
+        hx-target="this"
+        hx-swap="outerHTML"
+        class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 group border
+        {% if not msg.is_read %}
+            bg-orange-50 text-orange-700 border-orange-200/60 hover:bg-orange-100/80
+        {% else %}
+            bg-emerald-50 text-emerald-700 border-emerald-200/60 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200/60
+        {% endif %}">
+    
     {% if not msg.is_read %}
-        bg-orange-100 text-orange-700 hover:bg-orange-200
+        <svg class="shrink-0 text-orange-600" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Marquer comme lu</span>
     {% else %}
-        bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-700
-    {% endif %}">
-    {% if not msg.is_read %}
-        ✓ Marquer comme lu
-    {% else %}
-        ↺ Marquer comme non lu
+        <svg class="shrink-0 text-emerald-600 group-hover:text-rose-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 8.4c.5.3.8.8.8 1.4v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.8c0-.6.3-1.1.8-1.4l7.2-4a2 2 0 0 1 2 0l7.2 4Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
+        <span class="group-hover:hidden">Lu</span>
+        <span class="hidden group-hover:inline">Marquer comme non lu</span>
     {% endif %}
 </button>

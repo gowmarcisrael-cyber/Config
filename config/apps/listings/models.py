@@ -18,7 +18,18 @@ class Listing(models.Model):
         ('Maison', 'Maison'),
         ('Local commercial', 'Local commercial'),
         ('Terrain', 'Terrain'),
+        ('studio','studio'),
+        ('Hotel','Hotel'),
+        ('Villa','Villa'),
+        ('Celibaterium','Celibaterium'),
     ]
+    DURATION = [
+        ('Journalier', 'Journalier'),
+        ('Hebdomadaire', 'Hebdomadaire'),
+        ('Mensuel', 'Mensuel'),
+        ('Annuel', 'Annuel'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                             on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -38,6 +49,7 @@ class Listing(models.Model):
     slug = models.SlugField(max_length=255,unique=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_listings', blank=True)
+    duration = models.CharField(max_length=20, choices=DURATION, null=True, blank=True)
 
     def save(self,*args,**kwargs):
         if not self.slug:

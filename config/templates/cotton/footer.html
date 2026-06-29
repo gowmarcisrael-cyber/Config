@@ -1,0 +1,64 @@
+<footer class="bg-slate-900 text-gray-400 mt-16">
+    <div class="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+
+        <!-- Branding -->
+        <div class="col-span-1">
+            <p class="text-2xl font-bold text-orange-500 mb-3">HAVEN</p>
+            <p class="text-sm leading-relaxed text-gray-500">
+                La plateforme immobilière de référence. Achat, vente et location simplifiés.
+            </p>
+        </div>
+
+        <!-- Navigation -->
+        <div>
+            <p class="text-white text-sm font-semibold mb-4 uppercase tracking-wide">Navigation</p>
+            <ul class="space-y-2 text-sm">
+                <li><a href="{% url 'home' %}" class="hover:text-orange-400 transition-colors">Accueil</a></li>
+                <li><a href="{% url 'search' %}" class="hover:text-orange-400 transition-colors">Annonces</a></li>
+                <li><a href="{% url 'about' %}" class="hover:text-orange-500">À propos</a></li>
+                <li><a href="{% url 'contact' %}" class="hover:text-orange-500">Contact</a></li>
+            </ul>
+        </div>
+
+        <!-- Types de biens -->
+        <div>
+            <p class="text-white text-sm font-semibold mb-4 uppercase tracking-wide">Biens</p>
+            <ul class="space-y-2 text-sm">
+                <li><a href="{% url 'search' %}?property_type=Appartement"
+                        class="hover:text-orange-400 transition-colors">Appartements</a></li>
+                <li><a href="{% url 'search' %}?property_type=Maison"
+                        class="hover:text-orange-400 transition-colors">Maisons</a></li>
+                <li><a href="{% url 'search' %}?property_type=Terrain"
+                        class="hover:text-orange-400 transition-colors">Terrains</a></li>
+                <li><a href="{% url 'search' %}?property_type=Local+commercial"
+                        class="hover:text-orange-400 transition-colors">Locaux commerciaux</a></li>
+            </ul>
+        </div>
+
+        <!-- Contact -->
+        <div>
+            <p class="text-white text-sm font-semibold mb-4 uppercase tracking-wide">Contact</p>
+            <ul class="space-y-2 text-sm">
+                <li class="flex items-center gap-2">
+                    <i data-lucide="mail" class="w-4 h-4 shrink-0"></i> contact@haven.bf
+                </li>
+                <li class="flex items-center gap-2">
+                    <i data-lucide="phone" class="w-4 h-4 shrink-0"></i> +226 00 00 00 00
+                </li>
+                <li class="flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-4 h-4 shrink-0"></i> Ouagadougou, Burkina Faso
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div
+        class="border-t border-slate-800 px-6 py-4 flex flex-col md:flex-row items-center justify-between text-xs text-gray-600 max-w-6xl mx-auto">
+        <p>© 2026 HAVEN. Tous droits réservés.</p>
+        <div class="flex gap-4 mt-2 md:mt-0">
+            <a href="{% url 'privacy' %}" class="hover:text-orange-400">Confidentialité</a>
+            <a href="{% url 'terms' %}" class="hover:text-orange-400">Conditions d'utilisation</a>
+        </div>
+    </div>
+</footer>

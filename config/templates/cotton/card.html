@@ -1,0 +1,72 @@
+{% load listing_tags %}
+{% load static %}
+<div
+    class="bg-white rounded-xl overflow-hidden border border-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 w-full sm:w-[300px] mx-auto">
+
+    <!-- Image EN HAUT -->
+    <div class="relative h-48 bg-gray-100">
+        {% if listing.get_first_image %}
+        <img src="{{ listing.get_first_image }}" alt="{{ listing.title }}" class="w-full h-full object-cover">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center text-5xl">🏠</div>
+        {% endif %}
+
+        <!-- Prix sur l'image -->
+        <div
+            class="absolute bottom-2 left-2 bg-slate-900 bg-opacity-80 text-white text-xs font-bold px-2.5 py-1 rounded-lg">
+            {{ listing.price|floatformat:0 }} FCFA
+        </div>
+
+        <!-- Badge statut -->
+        <span class="absolute top-2 left-2 text-xs font-semibold px-2.5 py-1 rounded-full
+            {% if listing.status == 'A louer' %}bg-green-100 text-green-800
+            {% elif listing.status == 'En vente' %}bg-blue-100 text-blue-800
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {{ listing.status }}
+        </span>
+
+        {% if request.user.is_authenticated %}
+        <div class="absolute top-2 right-2">
+            {% is_favorited request.user listing as is_fav %}
+            {% include 'listings/partials/favorite_btn.html' with is_favorite=is_fav %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Contenu EN BAS -->
+    <div class="p-4">
+        <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-1 text-xs text-gray-400 font-medium">
+                <img src="{% static 'images/gps.png' %}" alt="" class="w-3.5 h-3.5">
+                <span>{{ listing.city }}</span>
+            </div>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">
+                {{ listing.property_type }}</span>
+        </div>
+        <h3 class="font-bold text-slate-800 text-sm mb-2 truncate">{{ listing.title }}</h3>
+        <p class="text-xs text-gray-400 mb-3 line-clamp-2">{{ listing.description }}</p>
+        <div class="flex items-center justify-between border-t border-gray-50 pt-3">
+            <div class="flex gap-3 text-xs text-gray-400">
+                {% if listing.bedrooms %}
+                <span class="flex items-center gap-1">
+                    <i data-lucide="bed" class="w-3 h-3"></i> {{ listing.bedrooms }}
+                </span>
+                {% endif %}
+                {% if listing.bathrooms %}
+                <span class="flex items-center gap-1">
+                    <i data-lucide="shower-head" class="w-3 h-3"></i> {{ listing.bathrooms }}
+                </span>
+                {% endif %}
+                {% if listing.area %}
+                <span class="flex items-center gap-1">
+                    <i data-lucide="ruler" class="w-3 h-3"></i> {{ listing.area }}m²
+                </span>
+                {% endif %}
+            </div>
+            <a href="{% url 'listing_detail' listing.slug %}"
+                class="text-xs font-bold text-orange-500 border border-orange-200 px-2.5 py-1 rounded-lg hover:bg-orange-50 transition-colors">
+                Voir →
+            </a>
+        </div>
+    </div>
+</div>
