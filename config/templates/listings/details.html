@@ -60,34 +60,47 @@
             </div>
 
             <!-- Caractéristiques -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                {% if listing.bedrooms %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                    <p class="text-xl mb-1">🛏</p>
-                    <p class="text-sm font-bold text-slate-700">{{ listing.bedrooms }}</p>
-                    <p class="text-xs text-gray-400">Chambres</p>
-                </div>
-                {% endif %}
-                {% if listing.bathrooms %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                    <p class="text-xl mb-1">🚿</p>
-                    <p class="text-sm font-bold text-slate-700">{{ listing.bathrooms }}</p>
-                    <p class="text-xs text-gray-400">Salles de bain</p>
-                </div>
-                {% endif %}
-                {% if listing.area %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                    <p class="text-xl mb-1">📐</p>
-                    <p class="text-sm font-bold text-slate-700">{{ listing.area }} m²</p>
-                    <p class="text-xs text-gray-400">Superficie</p>
-                </div>
-                {% endif %}
-                <div class="bg-gray-50 rounded-xl p-3 text-center border border-gray-100">
-                    <p class="text-xl mb-1">🏷</p>
-                    <p class="text-sm font-bold text-slate-700">{{ listing.property_type }}</p>
-                    <p class="text-xs text-gray-400">Type</p>
-                </div>
-            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+    
+    {% if listing.bedrooms %}
+    <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 text-center transition-all duration-200 hover:bg-slate-50 group">
+        <div class="text-slate-400 group-hover:text-orange-500 transition-colors flex justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16M2 11h20M22 4v16M6 11V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4M6 16v2M18 16v2"/></svg>
+        </div>
+        <p class="text-sm font-bold text-slate-800">{{ listing.bedrooms }}</p>
+        <p class="text-[11px] font-medium text-slate-400 mt-0.5">Chambres</p>
+    </div>
+    {% endif %}
+
+    {% if listing.bathrooms %}
+    <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 text-center transition-all duration-200 hover:bg-slate-50 group">
+        <div class="text-slate-400 group-hover:text-orange-500 transition-colors flex justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v2H4zM12 6v12M7 18h10M6 14h2M16 14h2"/></svg>
+        </div>
+        <p class="text-sm font-bold text-slate-800">{{ listing.bathrooms }}</p>
+        <p class="text-[11px] font-medium text-slate-400 mt-0.5">Salles de bain</p>
+    </div>
+    {% endif %}
+
+    {% if listing.area %}
+    <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 text-center transition-all duration-200 hover:bg-slate-50 group">
+        <div class="text-slate-400 group-hover:text-orange-500 transition-colors flex justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H3v18h18V3zM3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        </div>
+        <p class="text-sm font-bold text-slate-800">{{ listing.area }} m²</p>
+        <p class="text-[11px] font-medium text-slate-400 mt-0.5">Superficie</p>
+    </div>
+    {% endif %}
+
+    <div class="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 text-center transition-all duration-200 hover:bg-slate-50 group">
+        <div class="text-slate-400 group-hover:text-orange-500 transition-colors flex justify-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <p class="text-sm font-bold text-slate-800 truncate px-1">{{ listing.property_type }}</p>
+        <p class="text-[11px] font-medium text-slate-400 mt-0.5">Type de bien</p>
+    </div>
+
+</div>
 
             <!-- Description -->
             <div class="bg-white border border-gray-100 rounded-2xl p-5 mb-6">

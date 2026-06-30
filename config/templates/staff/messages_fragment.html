@@ -1,0 +1,66 @@
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Messages de contact</h1>
+            <p class="text-sm text-gray-400 mt-1">{{ contact_msgs.paginator.count }} messages au total</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'staff_listings' %}" class="text-sm text-orange-500 hover:underline">Annonces</a>
+            <a href="{% url 'staff_users' %}" class="text-sm text-orange-500 hover:underline">Utilisateurs</a>
+            <a href="{% url 'staff_stats' %}" class="text-sm text-orange-500 hover:underline">Stats</a>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        {% for msg in contact_msgs %}
+        <div class="bg-white border border-gray-100 rounded-2xl p-5">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <p class="font-semibold text-slate-800 text-sm">{{ msg.name }}</p>
+                    <p class="text-xs text-gray-400">{{ msg.email }} · {{ msg.date|date:"d/m/Y à H:i" }}</p>
+                </div>
+                {% if msg.subject %}
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-500">
+                    {{ msg.subject }}
+                </span>
+                {% endif %}
+            </div>
+            <p class="text-sm text-gray-600 leading-relaxed">{{ msg.message }}</p>
+            <div class="mt-3 pt-3 border-t border-gray-50 flex justify-between">
+                <a href="mailto:{{ msg.email }}" 
+                   class="text-xs text-orange-500 font-medium hover:underline">
+                    Répondre par email →
+                </a>
+                {% include 'staff/partials/read_btn.html' %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-16 text-gray-400">
+            <p class="text-4xl mb-3">📭</p>
+            <p class="text-sm">Aucun message reçu.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if contact_msgs.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if contact_msgs.has_previous %}
+        <a href="?page={{ contact_msgs.previous_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">←</a>
+        {% endif %}
+        {% for num in contact_msgs.paginator.page_range %}
+        <a href="?page={{ num }}"
+           class="px-4 py-2 rounded-lg border text-sm
+               {% if contact_msgs.number == num %}bg-orange-500 text-white border-orange-500{% else %}border-gray-200 hover:border-orange-400{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
+        {% if contact_msgs.has_next %}
+        <a href="?page={{ contact_msgs.next_page_number }}"
+           class="px-4 py-2 rounded-lg border border-gray-200 text-sm hover:border-orange-400 hover:text-orange-500">→</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>

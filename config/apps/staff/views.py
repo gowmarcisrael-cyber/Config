@@ -60,6 +60,8 @@ def staff_index(request):
         'resolved_reported_listing_count':resolved_reported_listing_count,
         'not_resolved_reported_listing_count':not_resolved_reported_listing_count,
     }
+    if request.headers.get('HX-request'):
+        return render(request,'staff/index_fragment.html',context=context)
     return render(request,'staff/index.html',context=context)
 
 def staff_listings(request):
@@ -91,6 +93,8 @@ def staff_listings(request):
         'statuses': Listing.STATUS,
         'filters': request.GET,
     }
+    if request.headers.get('HX-request'):
+        return render(request,'staff/listings_fragment.html',context=context)
     return render(request, 'staff/listings.html', context=context)
 
 @require_POST
@@ -128,6 +132,8 @@ def staff_users(request):
         'users': users,
         'filters': request.GET,
     }
+    if request.headers.get('HX-request'):
+        return render(request,'staff/users_fragment.html',context=context)
     return render(request, 'staff/users.html', context=context)
 
 @require_POST
@@ -182,6 +188,8 @@ def staff_stats(request):
         'resolved_reported_listing_count':resolved_reported_listing_count,
         'not_resolved_reported_listing_count':not_resolved_reported_listing_count,
     }
+    if request.headers.get('HX-request'):
+        return render(request,'staff/stats_fragment.html',context=context)
     return render(request, 'staff/stats.html', context=context)
 
 
@@ -203,6 +211,8 @@ def staff_reports(request):
         'reports': reports,
         'filters': request.GET,
     }
+    if request.headers.get('HX-request'):
+        return render(request,'staff/reports_fragment.html',context=context)
     return render(request, 'staff/reports.html', context=context)
 
 @require_POST
@@ -222,6 +232,8 @@ def staff_message(request):
     context = {
         'contact_msgs':messages
     }
+    if request.headers.get('HX-request'):
+        return render(request,'staff/messages_fragment.html',context=context)
     return render(request,'staff/messages.html',context=context)
 
 @require_POST
@@ -235,3 +247,76 @@ def toggle_message_read(request,pk):
         'msg':msg
     }
     return render(request,'staff/partials/read_btn.html',context=context)
+
+def staff_stats(request):
+    if not request.user.is_staff:
+        raise Http404()
+        
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
+    # 1. Requêtes de base existantes
+    listings_count = Listing.objects.count()
+    approved_listings_count = Listing.objects.filter(is_approved=True).count()
+    not_approved_listings_count = listings_count - approved_listings_count
+    recent_listings_count = Listing.objects.filter(created_at__gte=thirty_days_ago).count()
+
+    User = get_user_model()
+    users_count = User.objects.count()
+    active_users_count = User.objects.filter(is_active=True).count()
+    not_active_users_count = users_count - active_users_count
+    recent_users_count = User.objects.filter(date_joined__gte=thirty_days_ago).count()
+
+    visits_count = Visit.objects.count()
+    pending_visits_count = Visit.objects.filter(status='En attente').count()
+    accepted_visits_count = Visit.objects.filter(status='Acceptée').count()
+
+    repported_listing_count = Report.objects.count()
+    resolved_reported_listing_count = Report.objects.filter(is_resolved=True).count()
+    not_resolved_reported_listing_count = repported_listing_count - resolved_reported_listing_count 
+
+    # ==========================================
+    # CALCULS POUR LES GRAPHES SVG NATIFS
+    # ==========================================
+    
+    # Graphe 1 : Histogramme comparatif (Barres horizontales ou verticales)
+    # On calcule les pourcentages par rapport au total respectif pour dessiner les jauges
+    listing_approved_pct = (approved_listings_count / listings_count * 100) if listings_count > 0 else 0
+    listing_pending_pct = (not_approved_listings_count / listings_count * 100) if listings_count > 0 else 0
+    
+    visit_pending_pct = (pending_visits_count / visits_count * 100) if visits_count > 0 else 0
+    visit_accepted_pct = (accepted_visits_count / visits_count * 100) if visits_count > 0 else 0
+
+    # Graphe 2 : Donut SVG (Signalements résolus vs non résolus)
+    # Le périmètre d'un cercle de rayon 15.915 est d'environ 100, ce qui simplifie les calculs d'anneaux CSS !
+    report_resolved_pct = (resolved_reported_listing_count / repported_listing_count * 100) if repported_listing_count > 0 else 0
+    report_pending_pct = 100 - report_resolved_pct if repported_listing_count > 0 else 0
+
+    context = {
+        'listings_count': listings_count,
+        'approved_listings_count': approved_listings_count,
+        'not_approved_listings_count': not_approved_listings_count,
+        'recent_listings_count': recent_listings_count,
+        'users_count': users_count,
+        'active_users_count': active_users_count,
+        'not_active_users_count': not_active_users_count,
+        'recent_users_count': recent_users_count,
+        'visits_count': visits_count,
+        'pending_visits_count': pending_visits_count,
+        'accepted_visits_count': accepted_visits_count,
+        'reported_listing_count': repported_listing_count,
+        'resolved_reported_listing_count': resolved_reported_listing_count,
+        'not_resolved_reported_listing_count': not_resolved_reported_listing_count,
+        
+        # Nouvelles variables pour alimenter le front SVG
+        'listing_approved_pct': listing_approved_pct,
+        'listing_pending_pct': listing_pending_pct,
+        'visit_pending_pct': visit_pending_pct,
+        'visit_accepted_pct': visit_accepted_pct,
+        'report_resolved_pct': report_resolved_pct,
+        'report_pending_pct': report_pending_pct,
+    }
+    
+    # Correction de casse sur 'HX-request' -> 'HX-Request' pour assurer la détection HTMX
+    if request.headers.get('HX-Request'):
+        return render(request, 'staff/stats_fragment.html', context=context)
+    return render(request, 'staff/stats.html', context=context)

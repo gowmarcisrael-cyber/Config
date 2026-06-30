@@ -233,17 +233,73 @@
             </div>
         </div>
 
-        <div class="bg-white border border-gray-100 rounded-2xl p-6">
-            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">Photos</h2>
-            <label id="dropZone" class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-10 cursor-pointer hover:border-orange-400 transition-colors">
-                <span class="text-3xl mb-2">📷</span>
-                <span class="text-sm font-medium text-gray-600">Cliquez pour ajouter des photos</span>
-                <span class="text-xs text-gray-400 mt-1">JPG, PNG — plusieurs fichiers acceptés</span>
-                <input type="file" name="images" multiple accept="image/*" class="hidden" id="fileInput"
-                       onchange="previewImages(this)">
-            </label>
-            <div id="preview" class="flex flex-wrap gap-2 mt-3"></div>
+        <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm"
+     x-data="{ 
+        isDragging: false, 
+        files: [],
+        addFiles(fileList) {
+            for (let i = 0; i < fileList.length; i++) {
+                if (fileList[i].type.startsWith('image/')) {
+                    this.files.push({
+                        id: Date.now() + i,
+                        file: fileList[i],
+                        url: URL.createObjectURL(fileList[i])
+                    });
+                }
+            }
+            this.updateInput();
+        },
+        removeFile(id) {
+            this.files = this.files.filter(f => f.id !== id);
+            this.updateInput();
+        },
+        updateInput() {
+            // Synchronise les fichiers d'Alpine avec l'input HTML réel pour Django
+            const dataTransfer = new DataTransfer();
+            this.files.forEach(f => dataTransfer.items.add(f.file));
+            document.getElementById('fileInput').files = dataTransfer.files;
+        }
+     }">
+    
+    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Photos de l'annonce</h2>
+    
+    <label id="dropZone" 
+           class="relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-10 px-4 cursor-pointer transition-all duration-200 select-none"
+           :class="isDragging ? 'border-orange-500 bg-orange-50/30' : 'border-slate-200 hover:border-orange-400 bg-slate-50/30 hover:bg-slate-50'"
+           @dragover.prevent="isDragging = true"
+           @dragleave.prevent="isDragging = false"
+           @drop.prevent="isDragging = false; addFiles($event.dataTransfer.files)">
+        
+        <div class="p-3 bg-white rounded-xl shadow-sm text-slate-400 border border-slate-100 mb-3 transition-transform duration-200"
+             :class="isDragging ? 'scale-110 text-orange-500' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><line x1="16" x2="22" y1="5" y2="5"/><line x1="19" x2="19" y1="2" y2="8"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         </div>
+
+        <span class="text-sm font-bold text-slate-700">Glissez vos photos ici ou <span class="text-orange-500">parcourez</span></span>
+        <span class="text-[11px] text-slate-400 mt-1">Sélectionnez plusieurs fichiers JPG ou PNG</span>
+        
+        <input type="file" name="images" multiple accept="image/*" class="hidden" id="fileInput"
+               @change="addFiles($event.target.files)">
+    </label>
+
+    <template x-if="files.length > 0">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4 pt-4 border-t border-slate-100">
+            <template x-for="file in files" :key="file.id">
+                <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group border border-slate-200/60">
+                    <img :src="file.url" class="w-full h-full object-cover">
+                    
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button type="button" 
+                                @click.prevent="removeFile(file.id)"
+                                class="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </template>
+</div>
 
         <button type="submit"
                 class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
@@ -252,4 +308,3 @@
 
     </form>
 </div>
-<script src="{% static 'js/fileInput.js' %}"></script>

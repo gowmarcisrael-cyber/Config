@@ -230,3 +230,7 @@ CELERY_TIMEZONE = 'Africa/Ouagadougou'
 INSTALLED_APPS += [
     'django_celery_beat',
 ]
+
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True

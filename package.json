@@ -1,0 +1,11 @@
+{
+  "name": "haven",
+  "version": "1.0.0",
+  "dependencies": {
+    "tailwindcss": "^3.4.0"
+  },
+  "scripts": {
+    "dev": "tailwindcss -i ./static_src/tailwind.css -o ./config/static/css/tailwind.output.css --watch",
+    "build": "tailwindcss -i ./static_src/tailwind.css -o ./config/static/css/tailwind.output.css --minify"
+  }
+}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'dashboard/base.html' %}
 {% load l10n %}
 {% block title %}Publier une annonce — HAVEN{% endblock %}
 
@@ -175,30 +175,119 @@
             </div>
         </div>
 
-        <div class="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Gestion des photos</h2>
-            
-            {% if listing.images.all %}
-            <p class="text-xs text-gray-500 mb-2">Cochez les photos que vous souhaitez supprimer :</p>
-            <div class="grid grid-cols-3 gap-3 mb-4">
-                {% for img in listing.images.all %}
-                <div class="relative group border border-gray-100 rounded-xl overflow-hidden">
-                    <img src="{{ img.image.url }}" class="h-24 w-full object-cover">
-                    <label class="absolute top-2 right-2 bg-white/80 backdrop-blur-xs rounded-md p-1 cursor-pointer flex items-center justify-center border border-gray-200">
-                        <input type="checkbox" name="delete_images" value="{{ img.id }}" class="rounded text-orange-500 focus:ring-orange-400 h-4 w-4">
-                    </label>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+        <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm"
+     x-data="{ 
+        isDragging: false, 
+        newFiles: [],
+        deletedExistingIds: [],
 
-            <label class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl py-6 cursor-pointer hover:border-orange-400 transition-colors">
-                <span class="text-2xl mb-1">📷</span>
-                <span class="text-xs font-medium text-gray-600">Ajouter de nouvelles photos</span>
-                <input type="file" name="images" multiple accept="image/*" class="hidden" onchange="previewImages(this)">
-            </label>
-            <div id="preview" class="flex flex-wrap gap-2 mt-2"></div>
+        addNewFiles(fileList) {
+            for (let i = 0; i < fileList.length; i++) {
+                if (fileList[i].type.startsWith('image/')) {
+                    this.newFiles.push({
+                        id: Date.now() + i,
+                        file: fileList[i],
+                        url: URL.createObjectURL(fileList[i])
+                    });
+                }
+            }
+            this.updateInput();
+        },
+        removeNewFile(id) {
+            this.newFiles = this.newFiles.filter(f => f.id !== id);
+            this.updateInput();
+        },
+        toggleDeleteExisting(id) {
+            // Si déjà marqué pour suppression, on l'enlève de la liste (annulation), sinon on l'ajoute
+            if (this.deletedExistingIds.includes(id)) {
+                this.deletedExistingIds = this.deletedExistingIds.filter(item => item !== id);
+            } else {
+                this.deletedExistingIds.push(id);
+            }
+        },
+        updateInput() {
+            const dataTransfer = new DataTransfer();
+            this.newFiles.forEach(f => dataTransfer.items.add(f.file));
+            document.getElementById('fileInputEdit').files = dataTransfer.files;
+        }
+     }">
+    
+    <div class="mb-4">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Gestion des photos</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Modifiez, supprimez ou ajoutez de nouvelles images à votre annonce.</p>
+    </div>
+
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mb-4">
+        
+        {% for img in listing.images.all %}
+        <div class="relative aspect-square rounded-xl overflow-hidden border border-slate-200/60 bg-slate-50 group"
+             :class="deletedExistingIds.includes({{ img.id }}) ? 'opacity-40 ring-2 ring-red-500/50' : ''">
+            
+            <img src="{{ img.image.url }}" class="w-full h-full object-cover">
+            
+            <input type="checkbox" name="delete_images" value="{{ img.id }}" class="hidden"
+                   :checked="deletedExistingIds.includes({{ img.id }})">
+
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button type="button" 
+                        @click="toggleDeleteExisting({{ img.id }})"
+                        class="p-2 rounded-lg text-white transition-colors cursor-pointer"
+                        :class="deletedExistingIds.includes({{ img.id }}) ? 'bg-slate-700 hover:bg-slate-800' : 'bg-red-500 hover:bg-red-600'">
+                    
+                    <template x-if="!deletedExistingIds.includes({{ img.id }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </template>
+                    
+                    <template x-if="deletedExistingIds.includes({{ img.id }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 12l6-6m-6 6l6 6"/></svg>
+                    </template>
+                </button>
+            </div>
+
+            <div x-show="deletedExistingIds.includes({{ img.id }})" 
+                 class="absolute bottom-1.5 left-1.5 right-1.5 text-[9px] font-bold text-center bg-red-600 text-white py-0.5 rounded-md uppercase tracking-wider select-none">
+                À supprimer
+            </div>
         </div>
+        {% endfor %}
+
+        <template x-for="file in newFiles" :key="file.id">
+            <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group border border-orange-200 ring-2 ring-orange-500/10">
+                <img :src="file.url" class="w-full h-full object-cover">
+                
+                <div class="absolute top-1.5 left-1.5 text-[9px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-md uppercase tracking-wider select-none">
+                    Neuf
+                </div>
+
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" 
+                            @click.prevent="removeNewFile(file.id)"
+                            class="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors shadow-lg cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <label id="dropZone" 
+           class="relative flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-8 px-4 cursor-pointer transition-all duration-200 select-none"
+           :class="isDragging ? 'border-orange-500 bg-orange-50/30' : 'border-slate-200 hover:border-orange-400 bg-slate-50/30 hover:bg-slate-50'"
+           @dragover.prevent="isDragging = true"
+           @dragleave.prevent="isDragging = false"
+           @drop.prevent="isDragging = false; addNewFiles($event.dataTransfer.files)">
+        
+        <div class="p-2 bg-white rounded-lg shadow-xs text-slate-400 border border-slate-100 mb-2 transition-transform duration-200"
+             :class="isDragging ? 'scale-110 text-orange-500' : ''">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><line x1="16" x2="22" y1="5" y2="5"/><line x1="19" x2="19" y1="2" y2="8"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        </div>
+
+        <span class="text-xs font-bold text-slate-700">Déposez de nouvelles photos ou <span class="text-orange-500">parcourez</span></span>
+        
+        <input type="file" name="images" multiple accept="image/*" class="hidden" id="fileInputEdit"
+               @change="addNewFiles($event.target.files)">
+    </label>
+</div>
 
         <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
             Enregistrer les modifications
@@ -207,22 +296,4 @@
     </form>
 </div>
 
-<script>
-function previewImages(input) {
-    const preview = document.getElementById('preview');
-    preview.innerHTML = '';
-    if (input.files) {
-        [...input.files].forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.className = 'h-16 w-24 object-cover rounded-lg border border-gray-200';
-                preview.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-}
-</script>
 {% endblock %}
